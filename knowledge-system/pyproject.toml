@@ -1,0 +1,27 @@
+[project]
+name = "knowledge-system"
+version = "0.1.0"
+description = "Local knowledge compounding system with Kuzu kernel and Obsidian vault projection"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "kuzu==0.11.3",
+  "mcp>=1.0",
+  "networkx>=3.4",
+  "pydantic>=2.11",
+  "pymupdf>=1.27.2.3",
+  "pyyaml>=6.0",
+  "typer>=0.16",
+]
+
+[dependency-groups]
+dev = [
+  "pytest>=8.4",
+]
+
+[project.scripts]
+ks = "knowledge_system.cli:app"
+ks-mcp = "knowledge_system.mcp_runtime:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

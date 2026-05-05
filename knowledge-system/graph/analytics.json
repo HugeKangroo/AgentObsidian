@@ -1,0 +1,931 @@
+{
+  "node_count": 32,
+  "edge_count": 48,
+  "density": 0.048387,
+  "type_counts": {
+    "concept": 18,
+    "learning_plan": 1,
+    "playbook": 1,
+    "prompt_template": 1,
+    "query": 1,
+    "research_question": 1,
+    "source": 6,
+    "synthesis": 1,
+    "tool": 2
+  },
+  "isolated_nodes": [],
+  "no_outlinks": [],
+  "ranked_pages": [
+    {
+      "page_id": "learning-plan-agent-evaluation-readiness",
+      "title": "Agent Evaluation Readiness",
+      "type": "learning_plan",
+      "score": 12.381259,
+      "pagerank": 0.10124423,
+      "betweenness": 0.0172043,
+      "in_degree": 6,
+      "out_degree": 3,
+      "review_count": 2
+    },
+    {
+      "page_id": "question-modern-llm-architecture-lecture",
+      "title": "Modern LLM Architecture Lecture",
+      "type": "research_question",
+      "score": 9.694209,
+      "pagerank": 0.07425961,
+      "betweenness": 0.01290323,
+      "in_degree": 4,
+      "out_degree": 3,
+      "review_count": 2
+    },
+    {
+      "page_id": "tool-hermes-agent-memory-system",
+      "title": "Hermes Agent Memory System",
+      "type": "tool",
+      "score": 9.094209,
+      "pagerank": 0.07425961,
+      "betweenness": 0.01290323,
+      "in_degree": 4,
+      "out_degree": 3,
+      "review_count": 1
+    },
+    {
+      "page_id": "prompt-template-role-teardown-knolling",
+      "title": "Role Teardown Knolling Prompt",
+      "type": "prompt_template",
+      "score": 9.094209,
+      "pagerank": 0.07425961,
+      "betweenness": 0.01290323,
+      "in_degree": 4,
+      "out_degree": 3,
+      "review_count": 1
+    },
+    {
+      "page_id": "tool-sprite-pipeline-consistency",
+      "title": "Sprite Pipeline Consistency",
+      "type": "tool",
+      "score": 9.094209,
+      "pagerank": 0.07425961,
+      "betweenness": 0.01290323,
+      "in_degree": 4,
+      "out_degree": 3,
+      "review_count": 1
+    },
+    {
+      "page_id": "playbook-document-driven-coding-agent-workflow-2051353318447108548",
+      "title": "Document Driven Coding Agent Workflow",
+      "type": "playbook",
+      "score": 8.494209,
+      "pagerank": 0.07425961,
+      "betweenness": 0.01290323,
+      "in_degree": 4,
+      "out_degree": 3,
+      "review_count": 0
+    },
+    {
+      "page_id": "synthesis-agent-evaluation-readiness",
+      "title": "Synthesis: Agent Evaluation Readiness",
+      "type": "synthesis",
+      "score": 6.972681,
+      "pagerank": 0.0046875,
+      "betweenness": 0.00645161,
+      "in_degree": 0,
+      "out_degree": 5,
+      "review_count": 4
+    },
+    {
+      "page_id": "concept-agent-evaluation",
+      "title": "Agent Evaluation",
+      "type": "concept",
+      "score": 3.542155,
+      "pagerank": 0.03421547,
+      "betweenness": 0.0,
+      "in_degree": 2,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-production-failure-flywheel",
+      "title": "Production Failure Flywheel",
+      "type": "concept",
+      "score": 3.542155,
+      "pagerank": 0.03421547,
+      "betweenness": 0.0,
+      "in_degree": 2,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-regression-eval",
+      "title": "Regression Eval",
+      "type": "concept",
+      "score": 3.542155,
+      "pagerank": 0.03421547,
+      "betweenness": 0.0,
+      "in_degree": 2,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "query-how-should-i-evaluate-coding-agents",
+      "title": "How should I evaluate coding agents?",
+      "type": "query",
+      "score": 2.554844,
+      "pagerank": 0.00548438,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-agent-handoff",
+      "title": "Agent Handoff",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-artifact-reduction",
+      "title": "Artifact Reduction",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-hot-cold-memory",
+      "title": "Hot Cold Memory",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-image-prompt",
+      "title": "Image Prompt",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-knolling-layout",
+      "title": "Knolling Layout",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-kv-cache",
+      "title": "Kv Cache",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-prd-spec-plan",
+      "title": "Prd Spec Plan",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-prompt-caching",
+      "title": "Prompt Caching",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-session-search",
+      "title": "Session Search",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-sprite-pipeline",
+      "title": "Sprite Pipeline",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-task-acceptance",
+      "title": "Task Acceptance",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-training-stability",
+      "title": "Training Stability",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-transformer-architecture",
+      "title": "Transformer Architecture",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-visual-quality-checks",
+      "title": "Visual Quality Checks",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "concept-workflow-consistency",
+      "title": "Workflow Consistency",
+      "type": "concept",
+      "score": 2.257676,
+      "pagerank": 0.02576763,
+      "betweenness": 0.0,
+      "in_degree": 1,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "source-x-2051388640740401425",
+      "title": "Source: GitHub地址如下，里面有整个pipeline，除了我正文说的方法，还做了很多一致性的处理，比",
+      "type": "source",
+      "score": 0.846875,
+      "pagerank": 0.0046875,
+      "betweenness": 0.0,
+      "in_degree": 0,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "source-x-2037590936234959355",
+      "title": "Source: Starting to think through how to test your agent",
+      "type": "source",
+      "score": 0.846875,
+      "pagerank": 0.0046875,
+      "betweenness": 0.0,
+      "in_degree": 0,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "source-x-2049534755729707205",
+      "title": "Source: 如果你读过我之前关于 ChatGPT、Claude 以及 Clawdbot 记忆系统的文章，你就",
+      "type": "source",
+      "score": 0.846875,
+      "pagerank": 0.0046875,
+      "betweenness": 0.0,
+      "in_degree": 0,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "source-x-2051248243871498700",
+      "title": "Source: 搬到 GPT Image 2 试了下，质感比香蕉上了一个档次！😍",
+      "type": "source",
+      "score": 0.846875,
+      "pagerank": 0.0046875,
+      "betweenness": 0.0,
+      "in_degree": 0,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "source-x-2051353318447108548",
+      "title": "Source: 现在我用文档驱动方式搭配少量测试验证，让 coding agent 做项目，具体会先讨论对齐 p",
+      "type": "source",
+      "score": 0.846875,
+      "pagerank": 0.0046875,
+      "betweenness": 0.0,
+      "in_degree": 0,
+      "out_degree": 1,
+      "review_count": 0
+    },
+    {
+      "page_id": "source-x-2051119679670976760",
+      "title": "Source: 而斯坦福只用一小时的课，就把整个原理讲完了，还免费公开。",
+      "type": "source",
+      "score": 0.846875,
+      "pagerank": 0.0046875,
+      "betweenness": 0.0,
+      "in_degree": 0,
+      "out_degree": 1,
+      "review_count": 0
+    }
+  ],
+  "components": [
+    {
+      "component_id": "component-001",
+      "page_ids": [
+        "concept-agent-evaluation",
+        "concept-production-failure-flywheel",
+        "concept-regression-eval",
+        "learning-plan-agent-evaluation-readiness",
+        "query-how-should-i-evaluate-coding-agents",
+        "source-x-2037590936234959355",
+        "synthesis-agent-evaluation-readiness"
+      ],
+      "node_count": 7,
+      "edge_count": 13,
+      "type_diversity": 5,
+      "review_pressure": 0.8571,
+      "review_count": 6,
+      "synthesis_score": 17.35,
+      "top_pages": [
+        {
+          "page_id": "learning-plan-agent-evaluation-readiness",
+          "title": "Agent Evaluation Readiness",
+          "type": "learning_plan",
+          "score": 12.381259,
+          "pagerank": 0.10124423,
+          "betweenness": 0.0172043,
+          "in_degree": 6,
+          "out_degree": 3,
+          "review_count": 2
+        },
+        {
+          "page_id": "synthesis-agent-evaluation-readiness",
+          "title": "Synthesis: Agent Evaluation Readiness",
+          "type": "synthesis",
+          "score": 6.972681,
+          "pagerank": 0.0046875,
+          "betweenness": 0.00645161,
+          "in_degree": 0,
+          "out_degree": 5,
+          "review_count": 4
+        },
+        {
+          "page_id": "concept-agent-evaluation",
+          "title": "Agent Evaluation",
+          "type": "concept",
+          "score": 3.542155,
+          "pagerank": 0.03421547,
+          "betweenness": 0.0,
+          "in_degree": 2,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-production-failure-flywheel",
+          "title": "Production Failure Flywheel",
+          "type": "concept",
+          "score": 3.542155,
+          "pagerank": 0.03421547,
+          "betweenness": 0.0,
+          "in_degree": 2,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-regression-eval",
+          "title": "Regression Eval",
+          "type": "concept",
+          "score": 3.542155,
+          "pagerank": 0.03421547,
+          "betweenness": 0.0,
+          "in_degree": 2,
+          "out_degree": 1,
+          "review_count": 0
+        }
+      ]
+    },
+    {
+      "component_id": "component-006",
+      "page_ids": [
+        "concept-kv-cache",
+        "concept-training-stability",
+        "concept-transformer-architecture",
+        "question-modern-llm-architecture-lecture",
+        "source-x-2051119679670976760"
+      ],
+      "node_count": 5,
+      "edge_count": 7,
+      "type_diversity": 3,
+      "review_pressure": 0.4,
+      "review_count": 2,
+      "synthesis_score": 9.25,
+      "top_pages": [
+        {
+          "page_id": "question-modern-llm-architecture-lecture",
+          "title": "Modern LLM Architecture Lecture",
+          "type": "research_question",
+          "score": 9.694209,
+          "pagerank": 0.07425961,
+          "betweenness": 0.01290323,
+          "in_degree": 4,
+          "out_degree": 3,
+          "review_count": 2
+        },
+        {
+          "page_id": "concept-kv-cache",
+          "title": "Kv Cache",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-training-stability",
+          "title": "Training Stability",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-transformer-architecture",
+          "title": "Transformer Architecture",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "source-x-2051119679670976760",
+          "title": "Source: 而斯坦福只用一小时的课，就把整个原理讲完了，还免费公开。",
+          "type": "source",
+          "score": 0.846875,
+          "pagerank": 0.0046875,
+          "betweenness": 0.0,
+          "in_degree": 0,
+          "out_degree": 1,
+          "review_count": 0
+        }
+      ]
+    },
+    {
+      "component_id": "component-003",
+      "page_ids": [
+        "concept-artifact-reduction",
+        "concept-sprite-pipeline",
+        "concept-workflow-consistency",
+        "source-x-2051388640740401425",
+        "tool-sprite-pipeline-consistency"
+      ],
+      "node_count": 5,
+      "edge_count": 7,
+      "type_diversity": 3,
+      "review_pressure": 0.2,
+      "review_count": 1,
+      "synthesis_score": 8.45,
+      "top_pages": [
+        {
+          "page_id": "tool-sprite-pipeline-consistency",
+          "title": "Sprite Pipeline Consistency",
+          "type": "tool",
+          "score": 9.094209,
+          "pagerank": 0.07425961,
+          "betweenness": 0.01290323,
+          "in_degree": 4,
+          "out_degree": 3,
+          "review_count": 1
+        },
+        {
+          "page_id": "concept-artifact-reduction",
+          "title": "Artifact Reduction",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-sprite-pipeline",
+          "title": "Sprite Pipeline",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-workflow-consistency",
+          "title": "Workflow Consistency",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "source-x-2051388640740401425",
+          "title": "Source: GitHub地址如下，里面有整个pipeline，除了我正文说的方法，还做了很多一致性的处理，比",
+          "type": "source",
+          "score": 0.846875,
+          "pagerank": 0.0046875,
+          "betweenness": 0.0,
+          "in_degree": 0,
+          "out_degree": 1,
+          "review_count": 0
+        }
+      ]
+    },
+    {
+      "component_id": "component-004",
+      "page_ids": [
+        "concept-hot-cold-memory",
+        "concept-prompt-caching",
+        "concept-session-search",
+        "source-x-2049534755729707205",
+        "tool-hermes-agent-memory-system"
+      ],
+      "node_count": 5,
+      "edge_count": 7,
+      "type_diversity": 3,
+      "review_pressure": 0.2,
+      "review_count": 1,
+      "synthesis_score": 8.45,
+      "top_pages": [
+        {
+          "page_id": "tool-hermes-agent-memory-system",
+          "title": "Hermes Agent Memory System",
+          "type": "tool",
+          "score": 9.094209,
+          "pagerank": 0.07425961,
+          "betweenness": 0.01290323,
+          "in_degree": 4,
+          "out_degree": 3,
+          "review_count": 1
+        },
+        {
+          "page_id": "concept-hot-cold-memory",
+          "title": "Hot Cold Memory",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-prompt-caching",
+          "title": "Prompt Caching",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-session-search",
+          "title": "Session Search",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "source-x-2049534755729707205",
+          "title": "Source: 如果你读过我之前关于 ChatGPT、Claude 以及 Clawdbot 记忆系统的文章，你就",
+          "type": "source",
+          "score": 0.846875,
+          "pagerank": 0.0046875,
+          "betweenness": 0.0,
+          "in_degree": 0,
+          "out_degree": 1,
+          "review_count": 0
+        }
+      ]
+    },
+    {
+      "component_id": "component-005",
+      "page_ids": [
+        "concept-image-prompt",
+        "concept-knolling-layout",
+        "concept-visual-quality-checks",
+        "prompt-template-role-teardown-knolling",
+        "source-x-2051248243871498700"
+      ],
+      "node_count": 5,
+      "edge_count": 7,
+      "type_diversity": 3,
+      "review_pressure": 0.2,
+      "review_count": 1,
+      "synthesis_score": 8.45,
+      "top_pages": [
+        {
+          "page_id": "prompt-template-role-teardown-knolling",
+          "title": "Role Teardown Knolling Prompt",
+          "type": "prompt_template",
+          "score": 9.094209,
+          "pagerank": 0.07425961,
+          "betweenness": 0.01290323,
+          "in_degree": 4,
+          "out_degree": 3,
+          "review_count": 1
+        },
+        {
+          "page_id": "concept-image-prompt",
+          "title": "Image Prompt",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-knolling-layout",
+          "title": "Knolling Layout",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-visual-quality-checks",
+          "title": "Visual Quality Checks",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "source-x-2051248243871498700",
+          "title": "Source: 搬到 GPT Image 2 试了下，质感比香蕉上了一个档次！😍",
+          "type": "source",
+          "score": 0.846875,
+          "pagerank": 0.0046875,
+          "betweenness": 0.0,
+          "in_degree": 0,
+          "out_degree": 1,
+          "review_count": 0
+        }
+      ]
+    },
+    {
+      "component_id": "component-002",
+      "page_ids": [
+        "concept-agent-handoff",
+        "concept-prd-spec-plan",
+        "concept-task-acceptance",
+        "playbook-document-driven-coding-agent-workflow-2051353318447108548",
+        "source-x-2051353318447108548"
+      ],
+      "node_count": 5,
+      "edge_count": 7,
+      "type_diversity": 3,
+      "review_pressure": 0.0,
+      "review_count": 0,
+      "synthesis_score": 7.65,
+      "top_pages": [
+        {
+          "page_id": "playbook-document-driven-coding-agent-workflow-2051353318447108548",
+          "title": "Document Driven Coding Agent Workflow",
+          "type": "playbook",
+          "score": 8.494209,
+          "pagerank": 0.07425961,
+          "betweenness": 0.01290323,
+          "in_degree": 4,
+          "out_degree": 3,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-agent-handoff",
+          "title": "Agent Handoff",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-prd-spec-plan",
+          "title": "Prd Spec Plan",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "concept-task-acceptance",
+          "title": "Task Acceptance",
+          "type": "concept",
+          "score": 2.257676,
+          "pagerank": 0.02576763,
+          "betweenness": 0.0,
+          "in_degree": 1,
+          "out_degree": 1,
+          "review_count": 0
+        },
+        {
+          "page_id": "source-x-2051353318447108548",
+          "title": "Source: 现在我用文档驱动方式搭配少量测试验证，让 coding agent 做项目，具体会先讨论对齐 p",
+          "type": "source",
+          "score": 0.846875,
+          "pagerank": 0.0046875,
+          "betweenness": 0.0,
+          "in_degree": 0,
+          "out_degree": 1,
+          "review_count": 0
+        }
+      ]
+    }
+  ],
+  "synthesis_candidates": [
+    {
+      "candidate_id": "synthesis-component-001",
+      "title": "Synthesize: Agent Evaluation Readiness",
+      "score": 17.35,
+      "page_ids": [
+        "learning-plan-agent-evaluation-readiness",
+        "synthesis-agent-evaluation-readiness",
+        "concept-agent-evaluation",
+        "concept-production-failure-flywheel",
+        "concept-regression-eval"
+      ],
+      "evidence": [
+        "component_nodes=7",
+        "component_edges=13",
+        "review_pressure=0.8571",
+        "type_diversity=5"
+      ],
+      "reason": "Component has enough connected pages to justify a synthesis pass and preserve review pressure as explicit work.",
+      "recommended_action": "create_or_update_synthesis_page"
+    },
+    {
+      "candidate_id": "synthesis-component-006",
+      "title": "Synthesize: Modern LLM Architecture Lecture",
+      "score": 9.25,
+      "page_ids": [
+        "question-modern-llm-architecture-lecture",
+        "concept-kv-cache",
+        "concept-training-stability",
+        "concept-transformer-architecture"
+      ],
+      "evidence": [
+        "component_nodes=5",
+        "component_edges=7",
+        "review_pressure=0.4",
+        "type_diversity=3"
+      ],
+      "reason": "Component has enough connected pages to justify a synthesis pass and preserve review pressure as explicit work.",
+      "recommended_action": "create_or_update_synthesis_page"
+    },
+    {
+      "candidate_id": "synthesis-component-003",
+      "title": "Synthesize: Sprite Pipeline Consistency",
+      "score": 8.45,
+      "page_ids": [
+        "tool-sprite-pipeline-consistency",
+        "concept-artifact-reduction",
+        "concept-sprite-pipeline",
+        "concept-workflow-consistency"
+      ],
+      "evidence": [
+        "component_nodes=5",
+        "component_edges=7",
+        "review_pressure=0.2",
+        "type_diversity=3"
+      ],
+      "reason": "Component has enough connected pages to justify a synthesis pass and preserve review pressure as explicit work.",
+      "recommended_action": "create_or_update_synthesis_page"
+    },
+    {
+      "candidate_id": "synthesis-component-004",
+      "title": "Synthesize: Hermes Agent Memory System",
+      "score": 8.45,
+      "page_ids": [
+        "tool-hermes-agent-memory-system",
+        "concept-hot-cold-memory",
+        "concept-prompt-caching",
+        "concept-session-search"
+      ],
+      "evidence": [
+        "component_nodes=5",
+        "component_edges=7",
+        "review_pressure=0.2",
+        "type_diversity=3"
+      ],
+      "reason": "Component has enough connected pages to justify a synthesis pass and preserve review pressure as explicit work.",
+      "recommended_action": "create_or_update_synthesis_page"
+    },
+    {
+      "candidate_id": "synthesis-component-005",
+      "title": "Synthesize: Role Teardown Knolling Prompt",
+      "score": 8.45,
+      "page_ids": [
+        "prompt-template-role-teardown-knolling",
+        "concept-image-prompt",
+        "concept-knolling-layout",
+        "concept-visual-quality-checks"
+      ],
+      "evidence": [
+        "component_nodes=5",
+        "component_edges=7",
+        "review_pressure=0.2",
+        "type_diversity=3"
+      ],
+      "reason": "Component has enough connected pages to justify a synthesis pass and preserve review pressure as explicit work.",
+      "recommended_action": "create_or_update_synthesis_page"
+    },
+    {
+      "candidate_id": "synthesis-component-002",
+      "title": "Synthesize: Document Driven Coding Agent Workflow",
+      "score": 7.65,
+      "page_ids": [
+        "playbook-document-driven-coding-agent-workflow-2051353318447108548",
+        "concept-agent-handoff",
+        "concept-prd-spec-plan",
+        "concept-task-acceptance"
+      ],
+      "evidence": [
+        "component_nodes=5",
+        "component_edges=7",
+        "review_pressure=0.0",
+        "type_diversity=3"
+      ],
+      "reason": "Component has enough connected pages to justify a synthesis pass and preserve review pressure as explicit work.",
+      "recommended_action": "create_or_update_synthesis_page"
+    }
+  ]
+}

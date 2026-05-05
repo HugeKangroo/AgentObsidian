@@ -1,0 +1,32 @@
+exports/*.tmp
+*.bak
+.venv/
+__pycache__/
+.pytest_cache/
+knowledge-system/.venv/
+knowledge-system/.pytest_cache/
+knowledge-system/**/__pycache__/
+
+# User/raw source archives and legacy generated bookmark outputs.
+# These are data sources or superseded artifacts, not the current product.
+archive/
+data/
+exports/
+notes/
+reports/
+scripts/
+wiki/
+purpose.md
+schema.md
+
+# Knowledge-system runtime state.
+# Keep the product code, docs, contracts, graph export, and Obsidian vault in git;
+# keep local databases, backups, caches, and raw captures out of git.
+knowledge-system/knowledge.kuzu
+knowledge-system/backups/
+knowledge-system/distillations/
+knowledge-system/indexes/
+knowledge-system/reviews/
+knowledge-system/runs/
+knowledge-system/signals/
+knowledge-system/sources/raw/

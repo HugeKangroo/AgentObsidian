@@ -1,0 +1,117 @@
+[
+  {
+    "candidate_id": "synthesis-component-001",
+    "title": "Synthesize: Agent Evaluation Readiness",
+    "score": 17.35,
+    "page_ids": [
+      "learning-plan-agent-evaluation-readiness",
+      "synthesis-agent-evaluation-readiness",
+      "concept-agent-evaluation",
+      "concept-production-failure-flywheel",
+      "concept-regression-eval"
+    ],
+    "evidence": [
+      "component_nodes=7",
+      "component_edges=13",
+      "review_pressure=0.8571",
+      "type_diversity=5"
+    ],
+    "reason": "Component has enough connected pages to justify a synthesis pass and preserve review pressure as explicit work.",
+    "recommended_action": "create_or_update_synthesis_page"
+  },
+  {
+    "candidate_id": "synthesis-component-006",
+    "title": "Synthesize: Modern LLM Architecture Lecture",
+    "score": 9.25,
+    "page_ids": [
+      "question-modern-llm-architecture-lecture",
+      "concept-kv-cache",
+      "concept-training-stability",
+      "concept-transformer-architecture"
+    ],
+    "evidence": [
+      "component_nodes=5",
+      "component_edges=7",
+      "review_pressure=0.4",
+      "type_diversity=3"
+    ],
+    "reason": "Component has enough connected pages to justify a synthesis pass and preserve review pressure as explicit work.",
+    "recommended_action": "create_or_update_synthesis_page"
+  },
+  {
+    "candidate_id": "synthesis-component-003",
+    "title": "Synthesize: Sprite Pipeline Consistency",
+    "score": 8.45,
+    "page_ids": [
+      "tool-sprite-pipeline-consistency",
+      "concept-artifact-reduction",
+      "concept-sprite-pipeline",
+      "concept-workflow-consistency"
+    ],
+    "evidence": [
+      "component_nodes=5",
+      "component_edges=7",
+      "review_pressure=0.2",
+      "type_diversity=3"
+    ],
+    "reason": "Component has enough connected pages to justify a synthesis pass and preserve review pressure as explicit work.",
+    "recommended_action": "create_or_update_synthesis_page"
+  },
+  {
+    "candidate_id": "synthesis-component-004",
+    "title": "Synthesize: Hermes Agent Memory System",
+    "score": 8.45,
+    "page_ids": [
+      "tool-hermes-agent-memory-system",
+      "concept-hot-cold-memory",
+      "concept-prompt-caching",
+      "concept-session-search"
+    ],
+    "evidence": [
+      "component_nodes=5",
+      "component_edges=7",
+      "review_pressure=0.2",
+      "type_diversity=3"
+    ],
+    "reason": "Component has enough connected pages to justify a synthesis pass and preserve review pressure as explicit work.",
+    "recommended_action": "create_or_update_synthesis_page"
+  },
+  {
+    "candidate_id": "synthesis-component-005",
+    "title": "Synthesize: Role Teardown Knolling Prompt",
+    "score": 8.45,
+    "page_ids": [
+      "prompt-template-role-teardown-knolling",
+      "concept-image-prompt",
+      "concept-knolling-layout",
+      "concept-visual-quality-checks"
+    ],
+    "evidence": [
+      "component_nodes=5",
+      "component_edges=7",
+      "review_pressure=0.2",
+      "type_diversity=3"
+    ],
+    "reason": "Component has enough connected pages to justify a synthesis pass and preserve review pressure as explicit work.",
+    "recommended_action": "create_or_update_synthesis_page"
+  },
+  {
+    "candidate_id": "synthesis-component-002",
+    "title": "Synthesize: Document Driven Coding Agent Workflow",
+    "score": 7.65,
+    "page_ids": [
+      "playbook-document-driven-coding-agent-workflow-2051353318447108548",
+      "concept-agent-handoff",
+      "concept-prd-spec-plan",
+      "concept-task-acceptance"
+    ],
+    "evidence": [
+      "component_nodes=5",
+      "component_edges=7",
+      "review_pressure=0.0",
+      "type_diversity=3"
+    ],
+    "reason": "Component has enough connected pages to justify a synthesis pass and preserve review pressure as explicit work.",
+    "recommended_action": "create_or_update_synthesis_page"
+  }
+]

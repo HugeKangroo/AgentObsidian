@@ -1,0 +1,82 @@
+{
+  "search_knowledge": {
+    "name": "search_knowledge",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "get_context_pack": {
+    "name": "get_context_pack",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "get_source": {
+    "name": "get_source",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "get_page": {
+    "name": "get_page",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "list_reviews": {
+    "name": "list_reviews",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "get_graph_insights": {
+    "name": "get_graph_insights",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "get_vault_status": {
+    "name": "get_vault_status",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "prepare_synthesis_task": {
+    "name": "prepare_synthesis_task",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "register_source": {
+    "name": "register_source",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "run_processor": {
+    "name": "run_processor",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "integrate_distillation": {
+    "name": "integrate_distillation",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "apply_synthesis_draft": {
+    "name": "apply_synthesis_draft",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "apply_vault_reconcile": {
+    "name": "apply_vault_reconcile",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "sync_vault": {
+    "name": "sync_vault",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "lint_wiki": {
+    "name": "lint_wiki",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "emit_deletion_signal": {
+    "name": "emit_deletion_signal",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  }
+}
