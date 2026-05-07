@@ -158,9 +158,8 @@ Move/delete/new behavior:
 
 ## Known Limits
 
-- Reviewed approval commands for accepting moved pages are not implemented yet.
-- Reviewed approval commands for confirming deleted pages are not implemented yet.
-- Reviewed approval commands for importing newly created Obsidian pages are not implemented yet.
-- Chunk text is not rebuilt during body-only reconcile; current search uses `Page.text`.
+- Reviewed approval commands for accepting moved pages, confirming deleted projections, and importing new pages are now implemented; see `docs/verification/2026-05-05-vault-reviewed-proposals-verification.md`.
+- Reject commands are not implemented yet.
+- Chunk text and deterministic embeddings are rebuilt during body-only reconcile.
 - Readability lint is intentionally lightweight and should deepen as math/modeling pages become central.
 - Kuzu Page text updates drop and rebuild the Page FTS index to avoid a Kuzu 0.11.3 Windows crash seen when mutating indexed text.

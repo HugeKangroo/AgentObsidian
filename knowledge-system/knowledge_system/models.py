@@ -7,7 +7,7 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 
-SourceType = Literal["x_bookmark", "webpage", "pdf", "repo", "local_file", "manual_topic", "research_query"]
+SourceType = Literal["x_bookmark", "webpage", "pdf", "repo", "media", "local_file", "manual_topic", "research_query"]
 
 
 class SourceRecord(BaseModel):
@@ -86,4 +86,3 @@ class PipelineResult:
     search: Any
     answer_and_file_query: Any
     pending_mcp_tools: Any
-

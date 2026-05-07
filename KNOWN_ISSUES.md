@@ -1,22 +1,18 @@
 # Known Issues
 
-Date: 2026-05-05
+Date: 2026-05-06
 
-- Kuzu 0.11.3 failed under default Python 3.14.4 on Windows; use Python 3.12.
-- Obsidian import/reconcile detects projection hash drift, safe body edits, readability blockers, moved pages, deleted pages, and new vault pages.
-- Reviewed approval commands for accepting a vault move, confirming a vault deletion, or importing a new vault page are not implemented yet; those cases currently stop at review blockers.
-- Agent-mediated synthesis is implemented for context/task/draft/apply, but there is no unattended agent runtime; a coding agent still produces the draft outside product code.
-- Agent-produced synthesis pages remain draft until review blockers are resolved.
-- MCP runtime first slice is implemented through FastMCP stdio, but MCP client configuration docs, HTTP transport, runtime hardening, and intake write tools are not implemented yet.
-- Webpage, local PDF, and local repo intake first slices are implemented, but source scoring/filtering and full batch intake are not implemented yet.
+- Source-specific synthesis is still template-assisted. Update-mode synthesis drafts create proposals, but automatic choice of the best target page still needs stronger heuristics.
+- X bookmark source text may contain upstream encoding/display artifacts; raw evidence should remain untouched, while human-facing pages should continue improving normalization and review blockers.
+- Webpage, local PDF, and local repo intake first slices are implemented, but richer linked-page/media/repo expansion and full batch intake are not implemented yet.
+- Source scoring is heuristic and advisory; thresholds should be calibrated against real accepted/rejected sources before using scores for automation.
+- Linked evidence capture supports webpage links, explicit local media paths, explicit remote media download, explicit media annotation writeback, explicit local repo paths, and explicit repo cloning, but automated media caption/OCR is not implemented.
+- Source-level cleanup readiness reports and non-destructive cleanup candidate signals are implemented, but no automatic X bookmark deletion or browser/API cleanup workflow is implemented in this agent.
 - Repo intake is selective: it captures a tree manifest and selected README/metadata/docs/source snippets, not a full repository archive or code audit.
 - PDF intake extracts embedded text only; OCR, table extraction, figure captioning, and layout-aware math parsing are not implemented yet.
-- Kuzu Source schema v3 persists richer SourceRecord metadata for new writes; existing six X bookmark rows were backfilled from the classified CSV, but future migrated rows may still need backfill runs.
-- Kuzu 0.11.3 enforces a file lock for the local database; do not run parallel CLI processes against the same `knowledge.kuzu` path.
-- Hybrid retrieval first slice does not yet include vector embeddings; it uses text, graph, source priority, and review pressure.
-- Kuzu schema migration currently covers additive table/relationship evolution and legacy v1 metadata bootstrap; destructive changes, table renames, and index migrations still need explicit migrations and tests.
+- Hybrid retrieval includes deterministic `hashing-token-v1` vectors and `vector_score`, but it does not yet use a true semantic embedding model.
+- Retrieval evaluation exists only as a small seed set; it should grow with real user questions before aggressive scoring changes.
 - Graph synthesis ranking is heuristic; it does not yet suppress or downgrade candidates after a synthesis page has been materialized.
 - Browser extension and full X batch processing are deferred.
-- Eleven review blockers remain unresolved because linked repo/article/media/transcript evidence has not been fetched and the new synthesis draft requires review.
-- Kuzu Page text updates require dropping and rebuilding the Page FTS index first in this Windows/Kuzu 0.11.3 setup.
-- No deletion candidates were emitted because blockers remain unresolved.
+- Review blockers remain unresolved where linked repo/article/media/transcript evidence has not been fetched.
+- No deletion candidates should be emitted automatically while blockers remain unresolved.

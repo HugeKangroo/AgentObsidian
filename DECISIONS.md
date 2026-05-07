@@ -1,48 +1,43 @@
 # Decisions
 
-Date: 2026-05-05
+Date: 2026-05-06
 
 - Build a usable local knowledge-compounding product, not a bookmark summarizer.
-- Use Kuzu as the M1 product kernel.
-- Pin Python to 3.12 for Kuzu compatibility.
-- Kuzu FTS and vector extension are viable in the pinned Python 3.12 environment.
-- Use Obsidian-compatible Markdown as the human-facing vault projection.
-- Treat Markdown as a projection, not the only source of truth.
-- Use Kuzu FTS/vector boundaries for hybrid retrieval.
-- Use NetworkX as graph algorithm fallback.
-- Make MCP the agent-facing product surface after stable core commands exist.
-- Do not modify raw `data/` or `archive/`.
-- Do not delete X bookmarks; emit deletion candidates only.
-- M4 has been verified; user approved post-M4 productization work.
-- Current remaining productization priorities are MCP client configuration/runtime hardening, vector retrieval as an optional scoring lane, deeper repo analysis, and reviewed approval workflows for vault move/delete/new proposals.
-- Kuzu schema migration is implemented as a versioned migrator in `knowledge_system.migrations`.
-- Schema v2 adds `ProjectionState` and `PROJECTS_TO` for vault projection state without making Markdown the sole source of truth.
-- Schema v3 adds Source metadata fields for source type, author, domain, value type, external links, image links, source date, and archived raw path.
-- Existing Kuzu kernels without metadata are treated as schema v1 and backed up before upgrade.
-- Graph analytics uses Kuzu graph state, NetworkX component analysis, and a pure-Python PageRank-style score to avoid adding numpy/scipy as runtime dependencies.
-- Synthesis ranking prioritizes connected components by graph structure, type diversity, and unresolved review pressure.
-- Default synthesis path is agent-mediated: the product prepares context packs and validates structured drafts, while Codex, Claude Code, or a similar coding agent performs reasoning/generation.
-- Do not add a product-level LLM Provider dependency.
-- Agent-mediated synthesis product slice is implemented through context packs, portable task bundles, Pydantic draft validation, fixture mode, and Kuzu/Obsidian writeback.
+- The core product is LLM Wiki process + immutable raw evidence + Obsidian canonical vault + rebuildable derived indexes.
+- Kuzu is removed, not optional. Do not add it back as a dependency, runtime path, migration layer, or test requirement without a fresh user decision.
+- Obsidian vault pages are canonical human-readable knowledge objects, not a projection of another database.
+- Raw captures under `vault/raw/` are canonical evidence; generated indexes under `vault/generated/` are rebuildable state.
+- Use SQLite FTS5, deterministic local `hashing-token-v1` vectors, JSON artifacts, and Obsidian-link graph analytics for the required local search/ranking stack.
+- Hybrid retrieval traces and retrieval eval reports are generated artifacts under `vault/generated/`; the durable eval examples live under `knowledge-system/evals/`.
+- Source cards should remain retrievable as evidence, but maintained knowledge pages should outrank source cards for general knowledge queries.
+- Linked evidence pages are evidence material until reviewed/reconciled; hybrid ranking should demote `linked-evidence` pages so captured raw evidence does not outrank maintained wiki pages.
+- Use MCP as the agent-facing product surface after stable CLI functions exist.
+- Do not add a product-level LLM Provider dependency. Codex, Claude Code, or a similar local agent performs reasoning over context packs and returns schema-validated artifacts.
+- Agent task bundles must make evidence review operational: source-card links, raw manifest paths, pending blockers, claim-support requirements, and Obsidian/math/modeling structure belong in `task.md`, not only in chat.
+- Synthesis drafts should include `claim_support` entries for nontrivial claims so unsupported claims can remain visible as evidence gaps or review blockers.
 - Agent-produced synthesis pages remain `draft` until review blockers are resolved.
-- Obsidian is the human learning/readability surface; Kuzu remains the structured source of truth.
-- Obsidian import/reconcile is conservative: body-only edits can apply automatically, but identity, type, source, readability, and modeling risks produce review blockers.
-- Obsidian moved/deleted/new reconcile remains conservative: detection is implemented, but moves, deletions, and new pages create review blockers rather than automatically changing Kuzu paths, deleting pages, or importing new records.
-- Math/modeling knowledge pages should favor readable structure: intuition, formula explanation, variables/assumptions/constraints/objectives, tables, flows, and diagrams when useful.
-- Kuzu Page text updates must drop/rebuild the Page FTS index to avoid the observed Kuzu 0.11.3 Windows crash when mutating indexed text.
-- Use the official MCP Python SDK with FastMCP for the first agent-facing runtime.
-- MCP runtime starts as stdio/direct-run entrypoints (`ks-mcp` and `ks mcp-stdio`) rather than HTTP service infrastructure.
-- MCP read tools may expose broad retrieval/context/status operations, while write tools stay narrow and call existing validated core functions.
-- Runtime MCP tools currently cover search, context packs, source/page/review reads, graph insights, vault status, synthesis task/apply, vault reconcile/sync, lint, and deletion-candidate signal emission.
-- Webpage is the first real intake adapter because it is the shortest path from X bookmark URLs to preserved raw capture plus normalized knowledge.
-- Webpage intake uses Python standard-library HTML parsing/fetching first; no new runtime dependency is added for the first slice.
-- Webpage raw HTML is preserved under `sources/raw/`; normalized source metadata is written under the intake run directory.
-- MCP `register_source` now supports `source_type='webpage'`; `run_processor` and `integrate_distillation` remain design contracts until broader intake orchestration is implemented.
-- Hybrid retrieval first slice combines Kuzu FTS/fallback text hits, graph ranking, source priority, and unresolved review pressure into an explainable trace.
-- Vector retrieval remains deferred behind the hybrid retrieval contract; it should be added as another scoring lane rather than replacing the explainable trace.
-- Use PyMuPDF for PDF intake because it gives a stronger path for text extraction and future layout/image handling than a lighter PDF-only parser.
-- PDF intake first slice supports local PDF files, preserves the raw PDF, extracts page text, and writes through the same SourceRecord/Kuzu/vault lifecycle as webpage intake.
-- Repo intake first slice captures a repository tree manifest plus selected README/metadata/docs/source snippets instead of copying or claiming a full code audit.
-- MCP `register_source` now supports `source_type='webpage'`, `source_type='pdf'`, and `source_type='repo'`.
-- Source metadata backfill should only fill blank fields for existing sources and should not create new sources or overwrite user/manual nonblank metadata.
-- Source metadata backfill uses the original classified bookmark CSV as evidence and writes an auditable run artifact.
+- Agent-produced synthesis drafts with `target_page_id` must create a reviewed proposal rather than directly mutating the target page.
+- Updates to existing canonical wiki pages should go through `vault/proposals/` and explicit accept/reject, not silent overwrite.
+- Accepted proposals rebuild generated search/vector/graph artifacts; rejected proposals remain auditable Markdown.
+- Reviewed proposals must carry their own Evidence Context, including source-card links and raw manifest paths, so Obsidian review can verify provenance without treating generated text as source truth.
+- Proposal lint must block acceptance if source-card context or raw manifest references are missing from a pending update proposal.
+- Reviews are durable vault objects and must preserve unresolved evidence rather than letting generated prose hide gaps.
+- Intake scoring is advisory and auditable, not destructive: it records relevance, novelty, evidence completeness, actionability, decision, and reasons on source cards and API results, but it must not delete or suppress raw captures.
+- Linked external/media evidence should first become an explicit generated queue; actual follow-up capture can then operate item-by-item without weakening raw evidence or cleanup safety.
+- Linked evidence capture must be conservative: webpage links may be fetched into raw vault evidence, media links may preserve a raw asset only when an explicit local media path or explicit `download_media` request is supplied, and repository URLs may be cloned only when an explicit local clone path or explicit `clone_repo` request is supplied.
+- Remote media download is opt-in and bounded before vault intake; downloaded bytes are staged under `runs/linked-media-downloads/` and then preserved through the normal raw media capture path.
+- Remote repository clone is opt-in and staged under `runs/linked-repo-clones/` before the existing selective repo intake path preserves a tree manifest and selected files.
+- Captured media means the raw asset is preserved and reviewable in Obsidian; it does not mean caption/OCR, interpretation, or claim support is complete.
+- Media interpretation is recorded as a separate annotation page. This keeps the raw media page stable, makes caption/observation provenance visible, and gives future OCR/vision workers the same writeback contract as humans or agents.
+- Resolving a media review blocker means an annotation exists with an explicit claim-support boundary; it does not mean the media is universally reviewed for all possible claims.
+- `vault/generated/linked_evidence_queue.json` is a generated worklist, not source truth.
+- `vault/generated/linked_evidence_status.json` is the generated reconciliation surface that merges queue items with capture results; capture result files remain the auditable generated records.
+- Linked evidence decisions are durable Obsidian review artifacts under `vault/reviews/`; generated status only projects them for operational visibility.
+- A linked evidence item being `captured` or `unsupported` is not the same as being reviewed, reconciled into maintained wiki knowledge, or safe for source cleanup.
+- A `reviewed`, `nonessential`, or `needs_followup` linked evidence decision is an input to cleanup readiness, not a destructive action.
+- Source cleanup readiness is generated reporting only. It may emit candidate state for the separate X bookmark cleanup agent, but this knowledge-system agent must not delete bookmarks or raw evidence.
+- Cleanup candidate emission writes only auditable vault review signals and a generated index. Deletion remains outside this agent.
+- Math/modeling knowledge pages should favor readable structure: intuition, formula explanation, variables, assumptions, constraints, objectives, validation, limits, tables, flows, and diagrams when useful.
+- X bookmark cleanup is a separate workflow. This system may emit deletion-candidate signals only after source value is preserved.
+- Do not modify raw `data/` or `archive/`.
+- Use `uv` for Python environment and dependency management.

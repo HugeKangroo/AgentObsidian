@@ -8,6 +8,20 @@ def mcp_tool_names() -> list[str]:
     return [
         "search_knowledge",
         "hybrid_search",
+        "compile_vault",
+        "vault_hybrid_search",
+        "write_retrieval_trace",
+        "evaluate_retrieval",
+        "build_linked_evidence_queue",
+        "capture_linked_evidence_item",
+        "get_linked_evidence_status",
+        "record_linked_evidence_decision",
+        "record_media_annotation",
+        "get_cleanup_readiness",
+        "emit_cleanup_candidates",
+        "get_vault_page",
+        "get_backlinks",
+        "get_map",
         "get_context_pack",
         "get_source",
         "get_page",
@@ -16,11 +30,11 @@ def mcp_tool_names() -> list[str]:
         "get_vault_status",
         "prepare_synthesis_task",
         "register_source",
-        "run_processor",
-        "integrate_distillation",
         "apply_synthesis_draft",
-        "apply_vault_reconcile",
-        "sync_vault",
+        "propose_page_update",
+        "lint_proposal",
+        "accept_proposal",
+        "reject_proposal",
         "lint_wiki",
         "emit_deletion_signal",
     ]
@@ -30,8 +44,8 @@ def mcp_contracts() -> dict[str, dict[str, object]]:
     return {
         name: {
             "name": name,
-            "safety": "read" if name.startswith(("search", "get", "list")) else "narrow_write",
-            "returns_run_id": not name.startswith(("search", "get", "list")),
+            "safety": "read" if name.startswith(("search", "get", "list", "compile", "vault_hybrid", "hybrid", "lint")) else "narrow_write",
+            "returns_run_id": not name.startswith(("search", "get", "list", "compile", "vault_hybrid", "hybrid", "lint")),
         }
         for name in mcp_tool_names()
     }

@@ -1,0 +1,27 @@
+[
+  {
+    "id": "agent-evaluation-readiness",
+    "query": "agent evaluation readiness regression evals traces",
+    "expected_page_ids": ["learning-plan-agent-evaluation-readiness"]
+  },
+  {
+    "id": "document-driven-agent-workflow",
+    "query": "document driven coding agent workflow plan spec acceptance",
+    "expected_page_ids": ["playbook-document-driven-coding-agent-workflow-2051353318447108548"]
+  },
+  {
+    "id": "hermes-memory-system",
+    "query": "Hermes agent memory prompt caching session search",
+    "expected_page_ids": ["tool-hermes-agent-memory-system"]
+  },
+  {
+    "id": "sprite-pipeline-consistency",
+    "query": "sprite pipeline consistency artifacts jitter visual quality",
+    "expected_page_ids": ["tool-sprite-pipeline-consistency"]
+  },
+  {
+    "id": "modern-llm-architecture",
+    "query": "modern LLM architecture transformer kv cache training stability",
+    "expected_page_ids": ["question-modern-llm-architecture-lecture"]
+  }
+]

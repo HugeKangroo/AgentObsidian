@@ -86,6 +86,8 @@ def processor_shape(source: SourceRecord) -> tuple[str, str, list[str]]:
         return "Role Teardown Knolling Prompt", "prompt_template", ["image prompt", "knolling layout", "visual quality checks"]
     if source.processor == "media_context_saver":
         return "Modern LLM Architecture Lecture", "research_question", ["transformer architecture", "training stability", "kv cache"]
+    if source.processor == "media_extractor":
+        return source.title, "media", ["media evidence", "visual source"]
     if source.processor in {"webpage_extractor", "pdf_extractor"}:
         concepts = source.tags or ["webpage", "source"]
         return source.title, "article", concepts
@@ -107,6 +109,8 @@ def page_id_for(source: SourceRecord, page_type: str) -> str:
         return "prompt-template-role-teardown-knolling"
     if source.processor == "media_context_saver":
         return "question-modern-llm-architecture-lecture"
+    if source.processor == "media_extractor":
+        return f"media-{slugify(source.title)}-{source.id.removeprefix('media-')[:6]}"
     if source.processor in {"webpage_extractor", "pdf_extractor"}:
         stable_id = source.id.removeprefix("web-").removeprefix("pdf-")[:6]
         return f"article-{slugify(source.title)}-{stable_id}"
@@ -178,6 +182,8 @@ def missing_evidence(source: SourceRecord) -> list[str]:
         missing.append("Media links need capture/caption or an explicit nonessential decision.")
     if source.processor == "media_context_saver":
         missing.append("Video or transcript evidence is required before strong claims are integrated.")
+    if source.processor == "media_extractor":
+        missing.append("Media asset has been preserved, but caption/OCR and human interpretation are still required before strong claims.")
     if source.processor == "repo_expander" and not source.external_links:
         missing.append("Repository URL is missing for repo expansion.")
     if source.processor == "repo_extractor":

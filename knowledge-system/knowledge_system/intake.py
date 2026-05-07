@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import mimetypes
 import shutil
 import uuid
 from dataclasses import dataclass
@@ -49,6 +50,14 @@ class RepoSourceInput(BaseModel):
     max_files: int = 40
 
 
+class MediaSourceInput(BaseModel):
+    path: Path
+    uri: str = ""
+    title: str = ""
+    tags: list[str] = Field(default_factory=list)
+    priority: str = "medium"
+
+
 @dataclass
 class IntakeRun:
     run_id: str
@@ -81,6 +90,16 @@ class PdfIntakeRun:
 
 @dataclass
 class RepoIntakeRun:
+    run_id: str
+    raw_capture_path: Path
+    normalized_text_path: Path
+    source_record_path: Path
+    summary_path: Path
+    source: SourceRecord
+
+
+@dataclass
+class MediaIntakeRun:
     run_id: str
     raw_capture_path: Path
     normalized_text_path: Path
@@ -260,6 +279,63 @@ class IntakePipeline:
             source=source,
         )
 
+    def run_media(self, item: MediaSourceInput) -> MediaIntakeRun:
+        media_path = item.path.resolve()
+        if not media_path.exists() or not media_path.is_file():
+            raise FileNotFoundError(f"Media path does not exist or is not a file: {media_path}")
+        source_uri = item.uri or str(media_path)
+        title = item.title or media_path.stem or source_uri
+        source_id = _media_source_id(source_uri)
+        run_id = f"media-{slugify(title)}-{uuid.uuid4().hex[:10]}"
+        run_dir = self.runs_root / run_id
+        raw_dir = self.project_root / "sources" / "raw"
+        run_dir.mkdir(parents=True, exist_ok=True)
+        raw_dir.mkdir(parents=True, exist_ok=True)
+        raw_capture_path = raw_dir / f"{run_id}{_media_suffix(media_path)}"
+        normalized_text_path = run_dir / "normalized.txt"
+        source_record_path = run_dir / "source.json"
+        summary_path = run_dir / "summary.md"
+        shutil.copy2(media_path, raw_capture_path)
+        size_bytes = raw_capture_path.stat().st_size
+        content_type = mimetypes.guess_type(str(media_path))[0] or "application/octet-stream"
+        normalized_text = (
+            f"# {title}\n\n"
+            "Raw media evidence has been preserved for Obsidian review.\n\n"
+            f"- URI: {source_uri}\n"
+            f"- Original file: {media_path.name}\n"
+            f"- Content type: {content_type}\n"
+            f"- Size bytes: {size_bytes}\n"
+            "- Caption/OCR status: pending review.\n"
+        )
+        normalized_text_path.write_text(normalized_text, encoding="utf-8")
+        source = SourceRecord(
+            id=source_id,
+            source_type="media",
+            uri=source_uri,
+            title=title,
+            priority=item.priority,
+            domain=urlparse(source_uri).netloc or "local_media",
+            value_type=["media", "visual_evidence"],
+            processor="media_extractor",
+            raw_text=normalized_text,
+            image_links=[],
+            tags=item.tags,
+            archived_path=str(raw_capture_path.relative_to(self.project_root)).replace("\\", "/"),
+        )
+        source_record_path.write_text(json.dumps(source.model_dump(), ensure_ascii=False, indent=2), encoding="utf-8")
+        summary_path.write_text(
+            f"# Media Intake Summary\n\n- Source: {title}\n- URI: {source_uri}\n- File: {media_path.name}\n- Caption/OCR: pending review.\n",
+            encoding="utf-8",
+        )
+        return MediaIntakeRun(
+            run_id=run_id,
+            raw_capture_path=raw_capture_path,
+            normalized_text_path=normalized_text_path,
+            source_record_path=source_record_path,
+            summary_path=summary_path,
+            source=source,
+        )
+
 
 def _fetch_url(url: str) -> str:
     request = Request(url, headers={"User-Agent": "knowledge-system/0.1"})
@@ -284,6 +360,20 @@ def _repo_source_id(value: str) -> str:
     import hashlib
 
     return f"repo-{hashlib.sha256(value.encode('utf-8')).hexdigest()[:12]}"
+
+
+def _media_source_id(value: str) -> str:
+    import hashlib
+
+    return f"media-{hashlib.sha256(value.encode('utf-8')).hexdigest()[:12]}"
+
+
+def _media_suffix(path: Path) -> str:
+    suffix = path.suffix.lower()
+    if suffix and len(suffix) <= 10:
+        return suffix
+    guessed = mimetypes.guess_extension(mimetypes.guess_type(str(path))[0] or "")
+    return guessed or ".bin"
 
 
 def _extract_pdf_text(path: Path) -> str:

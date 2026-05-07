@@ -35,7 +35,8 @@ def lint_readability(page: PageDraft, body: str) -> list[ReadabilityIssue]:
                 message="Math or modeling pages need an intuition section before formal notation.",
             )
         )
-    if (page_type == "modeling" or "modeling" in tags) and not _has_modeling_structure(body):
+    modeling_tag_requires_structure = "modeling" in tags and page_type not in {"source", "concept", "media"}
+    if (page_type == "modeling" or modeling_tag_requires_structure) and not _has_modeling_structure(body):
         issues.append(
             ReadabilityIssue(
                 code="missing_modeling_structure",

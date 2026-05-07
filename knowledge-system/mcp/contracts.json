@@ -4,6 +4,81 @@
     "safety": "read",
     "returns_run_id": false
   },
+  "hybrid_search": {
+    "name": "hybrid_search",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "compile_vault": {
+    "name": "compile_vault",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "vault_hybrid_search": {
+    "name": "vault_hybrid_search",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "write_retrieval_trace": {
+    "name": "write_retrieval_trace",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "evaluate_retrieval": {
+    "name": "evaluate_retrieval",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "build_linked_evidence_queue": {
+    "name": "build_linked_evidence_queue",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "capture_linked_evidence_item": {
+    "name": "capture_linked_evidence_item",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "get_linked_evidence_status": {
+    "name": "get_linked_evidence_status",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "record_linked_evidence_decision": {
+    "name": "record_linked_evidence_decision",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "record_media_annotation": {
+    "name": "record_media_annotation",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "get_cleanup_readiness": {
+    "name": "get_cleanup_readiness",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "emit_cleanup_candidates": {
+    "name": "emit_cleanup_candidates",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "get_vault_page": {
+    "name": "get_vault_page",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "get_backlinks": {
+    "name": "get_backlinks",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "get_map": {
+    "name": "get_map",
+    "safety": "read",
+    "returns_run_id": false
+  },
   "get_context_pack": {
     "name": "get_context_pack",
     "safety": "read",
@@ -44,35 +119,35 @@
     "safety": "narrow_write",
     "returns_run_id": true
   },
-  "run_processor": {
-    "name": "run_processor",
-    "safety": "narrow_write",
-    "returns_run_id": true
-  },
-  "integrate_distillation": {
-    "name": "integrate_distillation",
-    "safety": "narrow_write",
-    "returns_run_id": true
-  },
   "apply_synthesis_draft": {
     "name": "apply_synthesis_draft",
     "safety": "narrow_write",
     "returns_run_id": true
   },
-  "apply_vault_reconcile": {
-    "name": "apply_vault_reconcile",
+  "propose_page_update": {
+    "name": "propose_page_update",
     "safety": "narrow_write",
     "returns_run_id": true
   },
-  "sync_vault": {
-    "name": "sync_vault",
+  "lint_proposal": {
+    "name": "lint_proposal",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "accept_proposal": {
+    "name": "accept_proposal",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "reject_proposal": {
+    "name": "reject_proposal",
     "safety": "narrow_write",
     "returns_run_id": true
   },
   "lint_wiki": {
     "name": "lint_wiki",
-    "safety": "narrow_write",
-    "returns_run_id": true
+    "safety": "read",
+    "returns_run_id": false
   },
   "emit_deletion_signal": {
     "name": "emit_deletion_signal",
