@@ -32,5 +32,7 @@ knowledge-system/signals/
 knowledge-system/sources/raw/
 knowledge-system/vault/raw/
 knowledge-system/vault/generated/
+vaults/*/raw/
+vaults/*/generated/
 knowledge-system/mcp/codex.config.toml
 knowledge-system/mcp/claude.mcp.json

@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field
 
 from .embeddings import embed_text
 from .graph_index import compute_vault_graph, write_vault_graph
+from .paths import resolve_vault_path
 from .text import excerpt, slugify
 from .vault_compile import compile_vault
 from .vault_models import CompiledPage, CompiledVault
@@ -59,7 +60,7 @@ class VaultHybridSearchHit(BaseModel):
 
 def build_search_index(project_root: Path, compiled: CompiledVault | None = None) -> SearchIndexBuildResult:
     compiled = compiled or compile_vault(project_root)
-    generated = project_root / "vault" / "generated"
+    generated = resolve_vault_path(project_root) / "generated"
     generated.mkdir(parents=True, exist_ok=True)
     sqlite_path = generated / "search.sqlite"
     vector_path = generated / "vectors.json"
@@ -100,7 +101,7 @@ def vault_hybrid_search(
     compiled: CompiledVault | None = None,
 ) -> list[VaultHybridSearchHit]:
     compiled = compiled or compile_vault(project_root)
-    generated = project_root / "vault" / "generated"
+    generated = resolve_vault_path(project_root) / "generated"
     sqlite_path = generated / "search.sqlite"
     vector_path = generated / "vectors.json"
     if not sqlite_path.exists() or not vector_path.exists():
@@ -160,7 +161,7 @@ def write_retrieval_trace(
 ) -> RetrievalTraceWriteResult:
     hits = vault_hybrid_search(project_root=project_root, query=query, limit=limit, compiled=compiled)
     trace_slug = slugify(trace_id or query) or "query"
-    path = project_root / "vault" / "generated" / "retrieval_traces" / f"retrieval-{trace_slug}.json"
+    path = resolve_vault_path(project_root) / "generated" / "retrieval_traces" / f"retrieval-{trace_slug}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "trace_id": path.stem,
@@ -205,7 +206,7 @@ def evaluate_retrieval(
                 "hits": [_hit_payload(hit) for hit in hits],
             }
         )
-    path = project_root / "vault" / "generated" / "retrieval_eval_report.json"
+    path = resolve_vault_path(project_root) / "generated" / "retrieval_eval_report.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "eval_path": str(eval_path),

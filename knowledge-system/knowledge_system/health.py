@@ -8,6 +8,7 @@ from pathlib import Path
 from .cleanup_readiness import build_cleanup_readiness
 from .completion_audit import build_completion_audit
 from .linked_evidence import build_linked_evidence_status
+from .paths import resolve_vault_path, vault_reference
 from .vault_compile import compile_vault
 
 
@@ -28,7 +29,7 @@ def build_health_report(project_root: Path) -> HealthReportResult:
     linked_payload = json.loads(linked.path.read_text(encoding="utf-8"))
     cleanup_payload = json.loads(cleanup.path.read_text(encoding="utf-8"))
     status = _health_status(audit_payload)
-    path = root / "vault" / "generated" / "health_report.json"
+    path = resolve_vault_path(root) / "generated" / "health_report.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         json.dumps(
@@ -45,7 +46,7 @@ def build_health_report(project_root: Path) -> HealthReportResult:
                 "completion_audit": {
                     "overall_percent": audit_payload["overall_percent"],
                     "blocking_count": audit_payload["blocking_count"],
-                    "path": str(audit.path.relative_to(root)).replace("\\", "/"),
+                    "path": vault_reference(root, audit.path),
                     "blocking_layers": [
                         {"id": layer["id"], "blockers": layer["blockers"]}
                         for layer in audit_payload["layers"]

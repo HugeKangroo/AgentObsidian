@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Literal
 
 from .mcp_contracts import mcp_contracts, mcp_tool_names
+from .paths import resolve_vault_path
 
 ClientName = Literal["codex", "claude"]
 
@@ -28,6 +29,7 @@ class WrittenClientConfig:
 
 def build_stdio_launch(project_root: Path, python_version: str = DEFAULT_PYTHON) -> StdioLaunch:
     root = project_root.resolve()
+    vault = resolve_vault_path(root)
     return StdioLaunch(
         command="uv",
         args=[
@@ -39,6 +41,8 @@ def build_stdio_launch(project_root: Path, python_version: str = DEFAULT_PYTHON)
             "ks-mcp",
             "--project-root",
             str(root),
+            "--vault-path",
+            str(vault),
         ],
     )
 

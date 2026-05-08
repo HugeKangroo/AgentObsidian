@@ -6,6 +6,8 @@ Current phase: LLM Wiki core + Obsidian canonical vault. Kuzu has been removed f
 
 Goal: build a usable local knowledge-compounding product that agents can operate through raw evidence, a human-readable Obsidian vault, compiler validation, derived search/ranking, context packs, and MCP tools.
 
+Current layout: the runnable Python package lives in `knowledge-system/`, while the configured Obsidian vault lives in `vaults/main/`. The default mapping is stored in `knowledge-system/agentobsidian.json` and can be overridden with `--vault-path` or `AGENT_OBSIDIAN_VAULT_PATH`.
+
 ## Completion Assessment
 
 Current machine-gated completion: 100.0% under `completion-gates-v1`.
@@ -61,6 +63,7 @@ Current blocking layers: none under `completion-gates-v1`.
 - Linked evidence pages are conservatively demoted in hybrid ranking until they are reconciled into maintained knowledge pages, preventing captured evidence from outranking accepted wiki pages.
 - FastMCP runtime exposes vault-native tools for search, compile, page/map/backlink reads, context packs, intake, synthesis draft apply, lint, and deletion-candidate signals.
 - Kuzu modules, migration code, old kernel/reconcile paths, old Kuzu tests, local `knowledge.kuzu`, backup files, and the installed `kuzu` package were removed.
+- Vault path resolution is centralized. The system no longer requires the Obsidian vault to live under the Python package directory.
 
 ## Current Commands
 
@@ -100,8 +103,8 @@ Current blocking layers: none under `completion-gates-v1`.
 ## Raw Data Policy
 
 - Do not modify `data/` or `archive/`.
-- `knowledge-system/vault/raw/` is local canonical evidence for the knowledge system and is ignored from git.
-- `knowledge-system/vault/generated/` is rebuildable derived state and is ignored from git.
+- `vaults/main/raw/` is local canonical evidence for the knowledge system and is ignored from git.
+- `vaults/main/generated/` is rebuildable derived state and is ignored from git.
 
 ## Verification
 
@@ -139,7 +142,7 @@ Current blocking layers: none under `completion-gates-v1`.
 - `uv run --python 3.12 ks health-check --project-root .` reported `status=healthy completion=100.0`.
 - `uv run --python 3.12 ks vault-status --project-root .` reported `pages=57 links=196 reviews=24 raw_captures=13 lint_issues=0`.
 - After linked webpage capture, `uv run --python 3.12 ks retrieval-eval --project-root . --eval-path evals\retrieval_examples.json --limit 5` returned `cases=5 top1=5 recall=5`.
-- See `docs/verification/2026-05-06-llm-wiki-obsidian-vault-verification.md`.
+- See `knowledge-system/docs/verification/2026-05-06-llm-wiki-obsidian-vault-verification.md`.
 
 ## Next Verification Target
 

@@ -8,6 +8,7 @@ from typing import Any
 
 import networkx as nx
 
+from .paths import resolve_vault_path
 from .vault_models import CompiledVault
 
 
@@ -54,7 +55,7 @@ def compute_vault_graph(compiled: CompiledVault) -> dict[str, Any]:
 
 def write_vault_graph(project_root: Path, compiled: CompiledVault) -> Path:
     graph = compute_vault_graph(compiled)
-    path = project_root / "vault" / "generated" / "graph_analytics.json"
+    path = resolve_vault_path(project_root) / "generated" / "graph_analytics.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(graph, ensure_ascii=False, indent=2), encoding="utf-8")
     return path

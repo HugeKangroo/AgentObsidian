@@ -21,7 +21,9 @@ def test_stdio_launch_uses_uv_directory_and_absolute_project_root(tmp_path: Path
 
     assert launch.command == "uv"
     assert launch.args[:2] == ["--directory", str(project_root.resolve())]
-    assert launch.args[-2:] == ["--project-root", str(project_root.resolve())]
+    assert "--project-root" in launch.args
+    assert str(project_root.resolve()) in launch.args
+    assert launch.args[-2:] == ["--vault-path", str((project_root / "vault").resolve())]
 
 
 def test_codex_config_toml_matches_codex_mcp_shape(tmp_path: Path) -> None:

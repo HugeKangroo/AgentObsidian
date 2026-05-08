@@ -8,6 +8,7 @@ from typing import Any
 
 from .linked_evidence import build_linked_evidence_status
 from .markdown_io import write_markdown_text
+from .paths import resolve_vault_path, vault_reference
 from .vault_compile import compile_vault
 
 
@@ -73,7 +74,7 @@ def build_cleanup_readiness(project_root: Path) -> CleanupReadinessResult:
             }
         )
     sources.sort(key=lambda item: (not item["ready_for_cleanup_signal"], item["source_type"], item["source_id"]))
-    path = project_root / "vault" / "generated" / "source_cleanup_readiness.json"
+    path = resolve_vault_path(project_root) / "generated" / "source_cleanup_readiness.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -101,7 +102,7 @@ def emit_cleanup_candidates(project_root: Path, reviewer: str = "") -> CleanupCa
         if source.get("cleanup_scope") != "x_bookmark":
             continue
         emitted.append(_write_cleanup_candidate(project_root, source, reviewer=reviewer))
-    index_path = project_root / "vault" / "generated" / "cleanup_candidates.json"
+    index_path = resolve_vault_path(project_root) / "generated" / "cleanup_candidates.json"
     index_path.parent.mkdir(parents=True, exist_ok=True)
     index_path.write_text(
         json.dumps(
@@ -109,7 +110,7 @@ def emit_cleanup_candidates(project_root: Path, reviewer: str = "") -> CleanupCa
                 "created_at": datetime.now(timezone.utc).isoformat(),
                 "candidate_count": len(emitted),
                 "candidates": emitted,
-                "readiness_report": str(readiness.path.relative_to(project_root)).replace("\\", "/"),
+                "readiness_report": vault_reference(project_root, readiness.path),
             },
             ensure_ascii=False,
             indent=2,
@@ -144,7 +145,7 @@ def _source_blockers(source_type: str, reviews: list[dict[str, str]], linked_ite
 def _write_cleanup_candidate(project_root: Path, source: dict[str, Any], reviewer: str) -> dict[str, str]:
     source_id = str(source["source_id"])
     candidate_id = f"deletion-candidate-{source_id}"
-    path = project_root / "vault" / "reviews" / f"{candidate_id}.md"
+    path = resolve_vault_path(project_root) / "reviews" / f"{candidate_id}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(
         write_markdown_text(
@@ -176,5 +177,5 @@ def _write_cleanup_candidate(project_root: Path, source: dict[str, Any], reviewe
     )
     return {
         "source_id": source_id,
-        "path": str(path.relative_to(project_root)).replace("\\", "/"),
+        "path": vault_reference(project_root, path),
     }

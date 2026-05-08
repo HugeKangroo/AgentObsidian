@@ -8,6 +8,7 @@ import re
 from .graph_index import write_vault_graph
 from .markdown_io import extract_wikilinks, parse_markdown_file, write_markdown_text
 from .models import PageDraft
+from .paths import resolve_project_reference, resolve_vault_path
 from .readability import lint_readability
 from .search_index import build_search_index
 from .text import slugify
@@ -146,7 +147,7 @@ def accept_proposal(project_root: Path, proposal_id: str) -> ProposalResult:
     if proposed_body is None:
         raise ValueError("Proposal is missing proposed body.")
     target_page_id = str(parsed_proposal.frontmatter["target_page_id"])
-    target_path = project_root / str(parsed_proposal.frontmatter["target_path"])
+    target_path = resolve_project_reference(project_root, str(parsed_proposal.frontmatter["target_path"]))
     parsed_target = parse_markdown_file(target_path)
     frontmatter = dict(parsed_target.frontmatter)
     frontmatter["updated"] = str(date.today())
@@ -307,7 +308,7 @@ def _set_proposal_status(path: Path, status: str, note: str) -> None:
 
 
 def _proposal_path(project_root: Path, proposal_id: str) -> Path:
-    path = project_root / "vault" / "proposals" / f"{proposal_id}.md"
+    path = resolve_vault_path(project_root) / "proposals" / f"{proposal_id}.md"
     if not path.exists():
         raise ValueError(f"Proposal not found: {proposal_id}")
     return path

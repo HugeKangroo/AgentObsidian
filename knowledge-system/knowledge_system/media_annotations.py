@@ -6,6 +6,7 @@ from pathlib import Path
 
 from .graph_index import write_vault_graph
 from .markdown_io import parse_markdown_file, write_markdown_text
+from .paths import resolve_vault_path
 from .search_index import build_search_index
 from .text import slugify
 from .vault_compile import compile_vault
@@ -147,7 +148,7 @@ def _resolve_media_reviews(
 ) -> int:
     if not resolve_reviews:
         return 0
-    reviews_root = project_root / "vault" / "reviews"
+    reviews_root = resolve_vault_path(project_root) / "reviews"
     if not reviews_root.exists():
         return 0
     resolved = 0

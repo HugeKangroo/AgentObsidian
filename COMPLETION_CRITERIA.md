@@ -11,7 +11,8 @@ cd knowledge-system
 uv run --python 3.12 ks completion-audit --project-root .
 ```
 
-The generated report is written to `knowledge-system/vault/generated/completion_audit.json`.
+The generated report is written under the configured vault, currently
+`vaults/main/generated/completion_audit.json`.
 
 ## Overall Release Gate
 

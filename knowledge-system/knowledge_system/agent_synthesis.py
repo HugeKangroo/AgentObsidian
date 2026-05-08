@@ -9,6 +9,7 @@ from typing import Any
 from pydantic import BaseModel, Field, field_validator
 
 from .graph_index import compute_vault_graph, write_vault_graph
+from .paths import resolve_project_reference
 from .proposals import create_page_update_proposal
 from .search_index import build_search_index
 from .text import excerpt, slugify
@@ -410,7 +411,7 @@ def _raw_excerpt(project_root: Path, manifest: dict[str, Any]) -> str:
         raw_path = manifest.get(key)
         if not raw_path:
             continue
-        path = project_root / str(raw_path)
+        path = resolve_project_reference(project_root, str(raw_path))
         if not path.exists() or path.suffix.lower() not in {".md", ".txt", ".html", ".json", ".csv"}:
             return f"Raw capture: {raw_path}"
         return excerpt(path.read_text(encoding="utf-8", errors="replace"), 700)

@@ -9,6 +9,7 @@ from typing import Any
 from .cleanup_readiness import build_cleanup_readiness
 from .linked_evidence import build_linked_evidence_status
 from .mcp_contracts import mcp_tool_names
+from .paths import resolve_vault_path
 from .search_index import evaluate_retrieval
 from .vault_compile import compile_vault
 from .vault_models import CompiledVault
@@ -51,7 +52,7 @@ def build_completion_audit(
     ]
     overall = round(sum(float(layer["percent"]) for layer in layers) / len(layers), 1) if layers else 0.0
     blocking_count = sum(1 for layer in layers if layer["status"] == "blocking")
-    path = root / "vault" / "generated" / "completion_audit.json"
+    path = resolve_vault_path(root) / "generated" / "completion_audit.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "criteria_version": CRITERIA_VERSION,
@@ -83,13 +84,18 @@ def _architecture_layer(root: Path, compiled: CompiledVault) -> dict[str, Any]:
             _check("Obsidian vault is documented as canonical", "Obsidian vault pages are canonical" in decisions),
             _check("Retired graph database is removed from committed decisions", f"{retired_graph_db.capitalize()} is removed" in decisions),
             _check("Retired graph database is absent from Python dependencies", retired_graph_db not in pyproject.lower()),
-            _check("Raw and generated vault state are excluded from git", "vault/raw" in gitignore and "vault/generated" in gitignore),
+            _check(
+                "Raw and generated vault state are excluded from git",
+                ("vault/raw" in gitignore or "vaults/*/raw" in gitignore)
+                and ("vault/generated" in gitignore or "vaults/*/generated" in gitignore),
+            ),
             _check("Compiled vault has no lint issues", len(compiled.lint_issues) == 0, f"lint_issues={len(compiled.lint_issues)}"),
         ],
     )
 
 
 def _obsidian_vault_layer(root: Path, compiled: CompiledVault) -> dict[str, Any]:
+    vault = resolve_vault_path(root)
     page_types = {page.type for page in compiled.pages}
     page_ids = {page.id for page in compiled.pages}
     resolved_links = len([link for link in compiled.links if link.resolved])
@@ -97,7 +103,7 @@ def _obsidian_vault_layer(root: Path, compiled: CompiledVault) -> dict[str, Any]
         "obsidian_vault",
         "Obsidian Vault",
         [
-            _check("Vault has a human entrypoint", (root / "vault" / "index.md").exists()),
+            _check("Vault has a human entrypoint", (vault / "index.md").exists()),
             _check("Vault has enough maintained pages for the seed corpus", len(compiled.pages) >= 30, f"pages={len(compiled.pages)}"),
             _check("Vault contains map pages", "map" in page_types),
             _check("Vault contains math/modeling learning surface", "map-mathematics-and-modeling" in page_ids),
@@ -255,7 +261,7 @@ def _production_operations_layer(root: Path) -> dict[str, Any]:
             _check("MCP client configuration is documented", (root / "mcp" / "README.md").exists()),
             _check("Completion audit command and MCP surface exist", (root / "knowledge_system" / "completion_audit.py").exists()),
             _check("Batch intake manifest runner exists", (root / "knowledge_system" / "batch_intake.py").exists()),
-            _check("Continuous watch or scheduled runbook exists", (root.parent / "docs" / "guides" / "continuous-operations.md").exists()),
+            _check("Continuous watch or scheduled runbook exists", (root / "docs" / "guides" / "continuous-operations.md").exists()),
             _check("Automated health-check or monitoring report exists", (root / "knowledge_system" / "health.py").exists()),
         ],
     )

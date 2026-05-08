@@ -13,6 +13,7 @@ from urllib.request import Request, urlopen
 from pydantic import BaseModel
 
 from .markdown_io import parse_markdown_file, write_markdown_text
+from .paths import resolve_vault_path, vault_reference
 from .text import slugify
 from .vault_compile import compile_vault
 from .vault_models import CompiledVault
@@ -76,7 +77,7 @@ def build_linked_evidence_queue(
 ) -> LinkedEvidenceQueueResult:
     compiled = compiled or compile_vault(project_root)
     items = _linked_evidence_items(compiled)
-    path = project_root / "vault" / "generated" / "linked_evidence_queue.json"
+    path = resolve_vault_path(project_root) / "generated" / "linked_evidence_queue.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "created_at": datetime.now(timezone.utc).isoformat(),
@@ -88,7 +89,7 @@ def build_linked_evidence_queue(
 
 
 def build_linked_evidence_status(project_root: Path) -> LinkedEvidenceStatusResult:
-    queue_path = project_root / "vault" / "generated" / "linked_evidence_queue.json"
+    queue_path = resolve_vault_path(project_root) / "generated" / "linked_evidence_queue.json"
     if not queue_path.exists():
         build_linked_evidence_queue(project_root)
     queue_payload = json.loads(queue_path.read_text(encoding="utf-8"))
@@ -122,11 +123,11 @@ def build_linked_evidence_status(project_root: Path) -> LinkedEvidenceStatusResu
                 "decided_at": str(decision.get("decided_at") or ""),
             }
         )
-    path = project_root / "vault" / "generated" / "linked_evidence_status.json"
+    path = resolve_vault_path(project_root) / "generated" / "linked_evidence_status.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "created_at": datetime.now(timezone.utc).isoformat(),
-        "queue_path": str(queue_path.relative_to(project_root)).replace("\\", "/"),
+        "queue_path": vault_reference(project_root, queue_path),
         "total_count": len(items),
         "pending_count": counts["pending"],
         "captured_count": counts["captured"],
@@ -159,7 +160,7 @@ def record_linked_evidence_decision(
     if not rationale.strip():
         raise ValueError("Linked evidence decision rationale cannot be empty.")
     item = _queue_item(project_root, item_id)
-    path = project_root / "vault" / "reviews" / f"linked-evidence-decision-{slugify(item.id)}.md"
+    path = resolve_vault_path(project_root) / "reviews" / f"linked-evidence-decision-{slugify(item.id)}.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     decided_at = datetime.now(timezone.utc).isoformat()
     path.write_text(
@@ -196,7 +197,7 @@ def resolve_linked_evidence_reviews(project_root: Path, reviewer: str = "") -> L
 
     resolved: list[dict[str, str]] = []
     skipped: list[dict[str, str]] = []
-    reviews_root = project_root / "vault" / "reviews"
+    reviews_root = resolve_vault_path(project_root) / "reviews"
     for path in sorted(reviews_root.glob("review-*.md")):
         parsed = parse_markdown_file(path)
         if parsed.frontmatter.get("type") != "missing_evidence":
@@ -229,9 +230,9 @@ def resolve_linked_evidence_reviews(project_root: Path, reviewer: str = "") -> L
             + f"- Reviewer: {reviewer or 'Unspecified'}\n"
         )
         path.write_text(write_markdown_text(frontmatter, resolution_body), encoding="utf-8")
-        resolved.append({"review_id": str(frontmatter.get("id") or path.stem), "path": _relative(project_root, path)})
+        resolved.append({"review_id": str(frontmatter.get("id") or path.stem), "path": vault_reference(project_root, path)})
 
-    report_path = project_root / "vault" / "generated" / "linked_evidence_review_resolution.json"
+    report_path = resolve_vault_path(project_root) / "generated" / "linked_evidence_review_resolution.json"
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(
         json.dumps(
@@ -296,8 +297,8 @@ def capture_linked_evidence_item(
             ),
             linked_source_id=result.source_id,
             primary_page_id=result.primary_page_id,
-            raw_manifest_path=_relative(project_root, result.raw_manifest_path),
-            source_card_path=_relative(project_root, result.source_card_path),
+            raw_manifest_path=vault_reference(project_root, result.raw_manifest_path),
+            source_card_path=vault_reference(project_root, result.source_card_path),
         )
     cloned_repo = False
     if classification == "repo" and local_repo_path is None and clone_repo:
@@ -333,8 +334,8 @@ def capture_linked_evidence_item(
             ),
             linked_source_id=result.source_id,
             primary_page_id=result.primary_page_id,
-            raw_manifest_path=_relative(project_root, result.raw_manifest_path),
-            source_card_path=_relative(project_root, result.source_card_path),
+            raw_manifest_path=vault_reference(project_root, result.raw_manifest_path),
+            source_card_path=vault_reference(project_root, result.source_card_path),
         )
     from .vault_pipeline import vault_intake_webpage
 
@@ -353,8 +354,8 @@ def capture_linked_evidence_item(
         reason="Linked webpage evidence captured through vault-native webpage intake.",
         linked_source_id=result.source_id,
         primary_page_id=result.primary_page_id,
-        raw_manifest_path=_relative(project_root, result.raw_manifest_path),
-        source_card_path=_relative(project_root, result.source_card_path),
+        raw_manifest_path=vault_reference(project_root, result.raw_manifest_path),
+        source_card_path=vault_reference(project_root, result.source_card_path),
     )
 
 
@@ -429,7 +430,7 @@ def _list_field(value: Any) -> list[str]:
 
 
 def _queue_item(project_root: Path, item_id: str) -> LinkedEvidenceItem:
-    queue_path = project_root / "vault" / "generated" / "linked_evidence_queue.json"
+    queue_path = resolve_vault_path(project_root) / "generated" / "linked_evidence_queue.json"
     if not queue_path.exists():
         build_linked_evidence_queue(project_root)
     payload = json.loads(queue_path.read_text(encoding="utf-8"))
@@ -552,7 +553,7 @@ def _write_capture_result(
     raw_manifest_path: str = "",
     source_card_path: str = "",
 ) -> LinkedEvidenceCaptureResult:
-    path = project_root / "vault" / "generated" / "linked_evidence_captures" / f"{item.id}.json"
+    path = resolve_vault_path(project_root) / "generated" / "linked_evidence_captures" / f"{item.id}.json"
     path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "queue_item_id": item.id,
@@ -583,12 +584,8 @@ def _write_capture_result(
     )
 
 
-def _relative(root: Path, path: Path) -> str:
-    return str(path.relative_to(root)).replace("\\", "/")
-
-
 def _capture_results(project_root: Path) -> dict[str, dict[str, Any]]:
-    captures_root = project_root / "vault" / "generated" / "linked_evidence_captures"
+    captures_root = resolve_vault_path(project_root) / "generated" / "linked_evidence_captures"
     captures: dict[str, dict[str, Any]] = {}
     if not captures_root.exists():
         return captures
@@ -597,13 +594,13 @@ def _capture_results(project_root: Path) -> dict[str, dict[str, Any]]:
         item_id = str(payload.get("queue_item_id") or "")
         if not item_id:
             continue
-        payload["capture_result_path"] = str(path.relative_to(project_root)).replace("\\", "/")
+        payload["capture_result_path"] = vault_reference(project_root, path)
         captures[item_id] = payload
     return captures
 
 
 def _decision_results(project_root: Path) -> dict[str, dict[str, Any]]:
-    reviews_root = project_root / "vault" / "reviews"
+    reviews_root = resolve_vault_path(project_root) / "reviews"
     decisions: dict[str, dict[str, Any]] = {}
     if not reviews_root.exists():
         return decisions
@@ -619,7 +616,7 @@ def _decision_results(project_root: Path) -> dict[str, dict[str, Any]]:
             "reviewer": str(parsed.frontmatter.get("reviewer") or ""),
             "decided_at": str(parsed.frontmatter.get("decided_at") or ""),
             "rationale": _rationale_from_decision_body(parsed.body),
-            "decision_path": str(path.relative_to(project_root)).replace("\\", "/"),
+            "decision_path": vault_reference(project_root, path),
         }
     return decisions
 

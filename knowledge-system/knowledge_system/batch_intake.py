@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 from typing import Any
 
+from .paths import vault_reference
 from .vault_pipeline import vault_intake_media, vault_intake_pdf, vault_intake_repo, vault_intake_webpage
 
 
@@ -102,8 +103,8 @@ def _run_one(root: Path, base_dir: Path, index: int, source: dict[str, Any]) -> 
             "source_type": source_type,
             "source_id": result.source_id,
             "primary_page_id": result.primary_page_id,
-            "raw_manifest_path": str(result.raw_manifest_path.relative_to(root)).replace("\\", "/"),
-            "source_card_path": str(result.source_card_path.relative_to(root)).replace("\\", "/"),
+            "raw_manifest_path": vault_reference(root, result.raw_manifest_path),
+            "source_card_path": vault_reference(root, result.source_card_path),
             "source_decision": result.source_score.get("decision"),
         }
     except Exception as exc:

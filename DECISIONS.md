@@ -6,6 +6,7 @@ Date: 2026-05-06
 - The core product is LLM Wiki process + immutable raw evidence + Obsidian canonical vault + rebuildable derived indexes.
 - Kuzu is removed, not optional. Do not add it back as a dependency, runtime path, migration layer, or test requirement without a fresh user decision.
 - Obsidian vault pages are canonical human-readable knowledge objects, not a projection of another database.
+- The runnable Python system and the user knowledge vault are separate filesystem concerns. The default local vault is `vaults/main/`, configured from `knowledge-system/agentobsidian.json`; commands may override it with `--vault-path` or `AGENT_OBSIDIAN_VAULT_PATH`.
 - Raw captures under `vault/raw/` are canonical evidence; generated indexes under `vault/generated/` are rebuildable state.
 - Use SQLite FTS5, deterministic local `hashing-token-v1` vectors, JSON artifacts, and Obsidian-link graph analytics for the required local search/ranking stack.
 - Hybrid retrieval traces and retrieval eval reports are generated artifacts under `vault/generated/`; the durable eval examples live under `knowledge-system/evals/`.

@@ -7,7 +7,7 @@ from pathlib import Path
 from typer.testing import CliRunner
 
 from knowledge_system.cli import app
-from knowledge_system.completion_audit import build_completion_audit
+from knowledge_system.completion_audit import _production_operations_layer, build_completion_audit
 from knowledge_system.mcp_runtime import create_mcp_server
 from knowledge_system.vault_pipeline import rebuild_sample_vault
 
@@ -65,3 +65,18 @@ def test_completion_audit_cli_and_mcp_tool(tmp_path: Path) -> None:
         assert any(layer["id"] == "cleanup_readiness" for layer in audit["layers"])
 
     asyncio.run(run_call())
+
+
+def test_production_operations_gate_uses_project_local_docs(tmp_path: Path) -> None:
+    project_root = tmp_path / "knowledge-system"
+    (project_root / "mcp").mkdir(parents=True)
+    (project_root / "mcp" / "README.md").write_text("# MCP\n", encoding="utf-8")
+    (project_root / "knowledge_system").mkdir(parents=True)
+    for filename in ["completion_audit.py", "batch_intake.py", "health.py"]:
+        (project_root / "knowledge_system" / filename).write_text("# placeholder\n", encoding="utf-8")
+    (project_root / "docs" / "guides").mkdir(parents=True)
+    (project_root / "docs" / "guides" / "continuous-operations.md").write_text("# Runbook\n", encoding="utf-8")
+
+    layer = _production_operations_layer(project_root)
+
+    assert layer["status"] == "complete"

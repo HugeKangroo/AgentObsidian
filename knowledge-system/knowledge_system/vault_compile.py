@@ -8,13 +8,14 @@ from typing import Any
 from .markdown_io import ParsedMarkdown, parse_markdown_file
 from .readability import lint_readability
 from .models import PageDraft
+from .paths import resolve_vault_path, vault_reference
 from .text import slugify
 from .vault_models import CompiledLink, CompiledPage, CompiledReview, CompiledVault, LintIssue
 
 
 def compile_vault(project_root: Path) -> CompiledVault:
     root = project_root.resolve()
-    vault = root / "vault"
+    vault = resolve_vault_path(root)
     generated = vault / "generated"
     generated.mkdir(parents=True, exist_ok=True)
     parsed_pages = _load_pages(root, vault)
@@ -22,7 +23,7 @@ def compile_vault(project_root: Path) -> CompiledVault:
     page_index = _page_index(pages)
     links, link_issues = _compiled_links(pages, parsed_pages, page_index)
     reviews = _load_reviews(root, vault)
-    raw_captures = _load_raw_manifests(vault)
+    raw_captures = _load_raw_manifests(root, vault)
     lint_issues = []
     lint_issues.extend(link_issues)
     lint_issues.extend(_page_lint_issues(pages, links))
@@ -61,7 +62,7 @@ def _compiled_page(root: Path, path: Path, parsed: ParsedMarkdown) -> CompiledPa
         id=page_id,
         title=title,
         type=page_type,
-        path=_relative(root, path),
+        path=vault_reference(root, path),
         body=parsed.body,
         sources=sources,
         tags=tags,
@@ -128,7 +129,7 @@ def _load_reviews(root: Path, vault: Path) -> list[CompiledReview]:
                 type=str(frontmatter.get("type") or "review"),
                 status=str(frontmatter.get("status") or "pending"),
                 blocking=bool(frontmatter.get("blocking", True)),
-                path=_relative(root, path),
+                path=vault_reference(root, path),
                 source_id=str(frontmatter.get("source_id") or ""),
                 page_id=str(frontmatter.get("page_id") or ""),
                 message=parsed.body.strip(),
@@ -137,14 +138,14 @@ def _load_reviews(root: Path, vault: Path) -> list[CompiledReview]:
     return reviews
 
 
-def _load_raw_manifests(vault: Path) -> list[dict[str, Any]]:
+def _load_raw_manifests(root: Path, vault: Path) -> list[dict[str, Any]]:
     raw_root = vault / "raw"
     if not raw_root.exists():
         return []
     manifests = []
     for path in sorted(raw_root.rglob("manifest.json")):
         payload = json.loads(path.read_text(encoding="utf-8"))
-        payload["path"] = str(path.relative_to(vault.parent)).replace("\\", "/")
+        payload["path"] = vault_reference(root, path)
         manifests.append(payload)
     return manifests
 
@@ -219,7 +220,3 @@ def _list_field(value: Any) -> list[str]:
     if isinstance(value, list):
         return [str(item) for item in value if str(item)]
     return [str(value)]
-
-
-def _relative(root: Path, path: Path) -> str:
-    return str(path.relative_to(root)).replace("\\", "/")

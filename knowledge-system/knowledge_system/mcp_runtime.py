@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 from datetime import date
 import json
+import os
 from pathlib import Path
 from typing import Any
 
@@ -26,6 +27,7 @@ from .linked_evidence import record_linked_evidence_decision as record_linked_ev
 from .linked_evidence import resolve_linked_evidence_reviews as resolve_linked_evidence_reviews_fn
 from .markdown_io import write_markdown_text
 from .media_annotations import record_media_annotation as record_media_annotation_fn
+from .paths import VAULT_PATH_ENV, resolve_vault_path
 from .proposals import (
     accept_proposal as accept_proposal_fn,
     create_page_update_proposal,
@@ -41,8 +43,10 @@ from .vault_compile import compile_vault as compile_vault_fn
 from .vault_pipeline import vault_intake_media, vault_intake_pdf, vault_intake_repo, vault_intake_webpage
 
 
-def create_mcp_server(project_root: Path) -> FastMCP:
+def create_mcp_server(project_root: Path, vault_path: Path | None = None) -> FastMCP:
     root = project_root.resolve()
+    if vault_path is not None:
+        os.environ[VAULT_PATH_ENV] = str(resolve_vault_path(root, vault_path))
     mcp = FastMCP("Knowledge System")
 
     @mcp.resource("knowledge://status", mime_type="application/json")
@@ -441,7 +445,7 @@ def create_mcp_server(project_root: Path) -> FastMCP:
     def emit_deletion_signal(source_id: str, reason: str) -> dict[str, Any]:
         """Emit a non-destructive deletion-candidate signal for a source."""
         signal_id = f"deletion-candidate-{source_id}-{date.today().isoformat()}"
-        path = root / "vault" / "reviews" / f"{signal_id}.md"
+        path = resolve_vault_path(root) / "reviews" / f"{signal_id}.md"
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(
             write_markdown_text(
@@ -467,21 +471,23 @@ def create_mcp_server(project_root: Path) -> FastMCP:
     return mcp
 
 
-def run_stdio(project_root: Path) -> None:
-    create_mcp_server(project_root=project_root).run()
+def run_stdio(project_root: Path, vault_path: Path | None = None) -> None:
+    create_mcp_server(project_root=project_root, vault_path=vault_path).run()
 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Run the knowledge system MCP server over stdio.")
     parser.add_argument("--project-root", type=Path, default=Path("."))
+    parser.add_argument("--vault-path", type=Path, default=None)
     args = parser.parse_args()
-    run_stdio(project_root=args.project_root)
+    run_stdio(project_root=args.project_root, vault_path=args.vault_path)
 
 
 def _status(project_root: Path) -> dict[str, Any]:
     compiled = compile_vault_fn(project_root)
     return {
         "project_root": str(project_root),
+        "vault_path": str(resolve_vault_path(project_root)),
         "counts": {
             "pages": len(compiled.pages),
             "sources": len([page for page in compiled.pages if page.type == "source"]),

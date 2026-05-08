@@ -8,14 +8,15 @@ from typing import Any
 
 from .markdown_io import write_markdown_text
 from .models import SourceRecord
+from .paths import resolve_vault_path, vault_reference
 from .text import slugify
 from .wiki_templates import agent_manual, vault_index
 
 
 class VaultStore:
     def __init__(self, project_root: Path) -> None:
-        self.project_root = project_root
-        self.vault = project_root / "vault"
+        self.project_root = project_root.resolve()
+        self.vault = resolve_vault_path(self.project_root)
 
     def prepare(self) -> None:
         for directory in [
@@ -58,12 +59,12 @@ class VaultStore:
             "author": source.author,
             "external_links": source.external_links,
             "image_links": source.image_links,
-            "raw_text_path": _relative(self.project_root, raw_text_path),
+            "raw_text_path": vault_reference(self.project_root, raw_text_path),
             "source_card_path": source_card_path,
             "captured_at": datetime.now(timezone.utc).isoformat(),
         }
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
-        return _relative(self.project_root, manifest_path)
+        return vault_reference(self.project_root, manifest_path)
 
     def write_raw_capture(self, source: SourceRecord, raw_path: Path, folder: str, filename: str) -> str:
         raw_dir = self.vault / "raw" / folder / source.id
@@ -76,11 +77,11 @@ class VaultStore:
             "source_type": source.source_type,
             "uri": source.uri,
             "title": source.title,
-            "raw_path": _relative(self.project_root, target),
+            "raw_path": vault_reference(self.project_root, target),
             "captured_at": datetime.now(timezone.utc).isoformat(),
         }
         manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")
-        return _relative(self.project_root, manifest_path)
+        return vault_reference(self.project_root, manifest_path)
 
     def write_markdown(self, relative_path: str, frontmatter: dict[str, Any], body: str) -> Path:
         path = self.vault / relative_path
@@ -113,7 +114,3 @@ def page_folder(page_type: str) -> str:
 
 def markdown_filename(title: str, page_id: str) -> str:
     return f"{slugify(title, fallback=page_id)}.md"
-
-
-def _relative(root: Path, path: Path) -> str:
-    return str(path.relative_to(root)).replace("\\", "/")

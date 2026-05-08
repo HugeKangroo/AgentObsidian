@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import typer
@@ -26,6 +27,7 @@ from .linked_evidence import (
 from .media_annotations import record_media_annotation
 from .mcp_config import ClientName, tool_contract_summary, write_client_configs
 from .mcp_runtime import run_stdio
+from .paths import VAULT_PATH_ENV, resolve_vault_path
 from .proposals import accept_proposal, create_page_update_proposal, lint_proposal, reject_proposal
 from .search_index import (
     build_search_index,
@@ -37,6 +39,18 @@ from .vault_compile import compile_vault
 from .vault_pipeline import rebuild_sample_vault, vault_intake_media, vault_intake_pdf, vault_intake_repo, vault_intake_webpage
 
 app = typer.Typer(help="Local LLM Wiki vault commands.")
+
+
+@app.callback()
+def configure_vault_path(
+    vault_path: Path | None = typer.Option(
+        None,
+        "--vault-path",
+        help="Override the configured Obsidian vault path for this command.",
+    ),
+) -> None:
+    if vault_path is not None:
+        os.environ[VAULT_PATH_ENV] = str(vault_path.resolve())
 
 
 @app.command()
@@ -54,7 +68,7 @@ def vault_compile_command(
 ) -> None:
     compiled = compile_vault(project_root)
     typer.echo(
-        f"pages={len(compiled.pages)} links={len(compiled.links)} reviews={len(compiled.reviews)} lint_issues={len(compiled.lint_issues)} generated={project_root / 'vault' / 'generated'}"
+        f"pages={len(compiled.pages)} links={len(compiled.links)} reviews={len(compiled.reviews)} lint_issues={len(compiled.lint_issues)} generated={resolve_vault_path(project_root) / 'generated'}"
     )
 
 

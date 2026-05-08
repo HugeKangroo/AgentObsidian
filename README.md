@@ -25,15 +25,16 @@ are audit context, not deletion or suppression rules.
 
 ## Main Paths
 
-- `knowledge-system/`: Python package, CLI, MCP runtime, tests, and generated vault-derived indexes.
-- `knowledge-system/vault/`: Obsidian-readable canonical vault for human study and review.
-- `knowledge-system/vault/raw/`: ignored local raw captures used as canonical evidence.
-- `knowledge-system/vault/wiki/`: maintained source, concept, method, question, and synthesis pages.
-- `knowledge-system/vault/maps/`: Obsidian map-of-content pages.
-- `knowledge-system/vault/proposals/`: reviewed page-update proposals before canonical writes.
-- `knowledge-system/vault/reviews/`: durable review blockers.
-- `knowledge-system/vault/generated/`: rebuildable graph, search, review, and vector artifacts.
-- `docs/`: research, design, decisions, implementation plans, and verification records.
+- `knowledge-system/`: Python package, CLI, MCP runtime, tests, run artifacts, and local agent tooling.
+- `knowledge-system/agentobsidian.json`: default runtime config; currently points the vault to `../vaults/main`.
+- `vaults/main/`: Obsidian-readable canonical vault for human study and review.
+- `vaults/main/raw/`: ignored local raw captures used as canonical evidence.
+- `vaults/main/wiki/`: maintained source, concept, method, question, media, math, modeling, and synthesis pages.
+- `vaults/main/maps/`: Obsidian map-of-content pages.
+- `vaults/main/proposals/`: reviewed page-update proposals before canonical writes.
+- `vaults/main/reviews/`: durable review blockers.
+- `vaults/main/generated/`: rebuildable graph, search, review, audit, and vector artifacts.
+- `knowledge-system/docs/`: research, design, decisions, implementation plans, guides, and verification records for the runnable system.
 - `STATUS.md`, `DECISIONS.md`, `KNOWN_ISSUES.md`: durable project status surfaces.
 - `COMPLETION_CRITERIA.md`: release-gate definition for what "100%" means.
 
@@ -45,6 +46,14 @@ The project uses `uv` and pins Python 3.12.
 cd knowledge-system
 uv sync --python 3.12
 ```
+
+For a fuller setup and operating walkthrough, see
+[`knowledge-system/docs/guides/getting-started.md`](knowledge-system/docs/guides/getting-started.md).
+
+Open `vaults/main/` directly in Obsidian. The CLI resolves that vault through
+`knowledge-system/agentobsidian.json`; you can override it for any command with
+the global option `--vault-path <path>` before the subcommand, or with the
+`AGENT_OBSIDIAN_VAULT_PATH` environment variable.
 
 ## Common Commands
 
@@ -216,6 +225,10 @@ Generate local MCP client config snippets for Codex and Claude Code:
 ```powershell
 uv run --python 3.12 ks mcp-config --project-root . --output-dir mcp
 ```
+
+The generated MCP config includes the resolved absolute vault path so local
+agents attach to the same Obsidian vault even though it lives outside the Python
+package directory.
 
 ## Current Boundary
 
