@@ -18,6 +18,18 @@ Generate local client configs:
 uv run --python 3.12 ks mcp-config --project-root . --output-dir mcp
 ```
 
+Inspect the release-gate completion audit through CLI or MCP:
+
+```powershell
+uv run --python 3.12 ks completion-audit --project-root .
+```
+
+Run the operational health report:
+
+```powershell
+uv run --python 3.12 ks health-check --project-root .
+```
+
 Generate a read-only Codex config:
 
 ```powershell

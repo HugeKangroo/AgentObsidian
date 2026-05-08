@@ -178,6 +178,10 @@ def test_vault_cli_rebuild_compile_and_hybrid_search_without_kuzu(tmp_path: Path
             "codex",
         ],
     )
+    review_resolution = runner.invoke(
+        app,
+        ["linked-evidence-resolve-reviews", "--project-root", str(project_root), "--reviewer", "codex"],
+    )
     linked_status = runner.invoke(app, ["linked-evidence-status", "--project-root", str(project_root)])
     cleanup_readiness = runner.invoke(app, ["cleanup-readiness", "--project-root", str(project_root)])
     cleanup_candidates = runner.invoke(app, ["cleanup-candidates", "--project-root", str(project_root), "--reviewer", "codex"])
@@ -207,6 +211,8 @@ def test_vault_cli_rebuild_compile_and_hybrid_search_without_kuzu(tmp_path: Path
     assert "resolved_reviews=1" in media_annotation.stdout
     assert linked_decision.exit_code == 0
     assert "decision=reviewed" in linked_decision.stdout
+    assert review_resolution.exit_code == 0
+    assert "resolved=" in review_resolution.stdout
     assert linked_status.exit_code == 0
     assert "captured=3" in linked_status.stdout
     assert "decisions=1" in linked_status.stdout
@@ -238,6 +244,7 @@ def test_vault_mcp_tools_read_compiled_state_without_kuzu(tmp_path: Path) -> Non
         assert "build_linked_evidence_queue" in tools
         assert "capture_linked_evidence_item" in tools
         assert "get_linked_evidence_status" in tools
+        assert "resolve_linked_evidence_reviews" in tools
         assert "get_cleanup_readiness" in tools
         assert "emit_cleanup_candidates" in tools
 
@@ -313,6 +320,8 @@ def test_vault_mcp_tools_read_compiled_state_without_kuzu(tmp_path: Path) -> Non
             },
         )
         assert decision["decision"] == "reviewed"
+        resolution = await server._tool_manager.call_tool("resolve_linked_evidence_reviews", {"reviewer": "codex"})
+        assert resolution["resolved_count"] >= 1
         status = await server._tool_manager.call_tool("get_linked_evidence_status", {})
         assert status["captured_count"] >= 3
         assert status["decision_count"] >= 1

@@ -41,9 +41,13 @@ def test_codex_config_toml_matches_codex_mcp_shape(tmp_path: Path) -> None:
     assert "capture_linked_evidence_item" in server["enabled_tools"]
     assert "get_linked_evidence_status" in server["enabled_tools"]
     assert "record_linked_evidence_decision" in server["enabled_tools"]
+    assert "resolve_linked_evidence_reviews" in server["enabled_tools"]
     assert "record_media_annotation" in server["enabled_tools"]
     assert "get_cleanup_readiness" in server["enabled_tools"]
     assert "emit_cleanup_candidates" in server["enabled_tools"]
+    assert "get_completion_audit" in server["enabled_tools"]
+    assert "run_batch_intake" in server["enabled_tools"]
+    assert "get_health_report" in server["enabled_tools"]
 
 
 def test_codex_read_only_config_limits_enabled_tools(tmp_path: Path) -> None:
@@ -61,9 +65,13 @@ def test_codex_read_only_config_limits_enabled_tools(tmp_path: Path) -> None:
     assert "capture_linked_evidence_item" not in enabled_tools
     assert "get_linked_evidence_status" in enabled_tools
     assert "record_linked_evidence_decision" not in enabled_tools
+    assert "resolve_linked_evidence_reviews" not in enabled_tools
     assert "record_media_annotation" not in enabled_tools
     assert "get_cleanup_readiness" in enabled_tools
     assert "emit_cleanup_candidates" not in enabled_tools
+    assert "get_completion_audit" in enabled_tools
+    assert "run_batch_intake" not in enabled_tools
+    assert "get_health_report" in enabled_tools
     assert all(item["safety"] == "read" for item in tool_contract_summary(read_only=True))
 
 

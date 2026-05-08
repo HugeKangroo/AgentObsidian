@@ -150,6 +150,7 @@ def _write_intake_source(
     source_score = score_source(source, existing_titles=existing_titles, existing_uris=existing_uris)
     source_frontmatter, source_body = source_card(source, title, raw_manifest, source_score)
     source_path = store.write_markdown(f"wiki/sources/source-{source.id}.md", source_frontmatter, source_body)
+    _write_source_card_backref(project_root / raw_manifest, source_path, project_root)
     if source.processor == "media_extractor":
         manifest = json.loads((project_root / raw_manifest).read_text(encoding="utf-8"))
         knowledge_frontmatter, body = media_evidence_page(
@@ -189,3 +190,9 @@ def _write_maps(store: VaultStore) -> None:
     ]:
         frontmatter, body = template()
         store.write_markdown(relative, frontmatter, body)
+
+
+def _write_source_card_backref(manifest_path: Path, source_path: Path, project_root: Path) -> None:
+    manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+    manifest["source_card_path"] = str(source_path.relative_to(project_root)).replace("\\", "/")
+    manifest_path.write_text(json.dumps(manifest, ensure_ascii=False, indent=2), encoding="utf-8")

@@ -29,6 +29,11 @@
     "safety": "narrow_write",
     "returns_run_id": true
   },
+  "run_batch_intake": {
+    "name": "run_batch_intake",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
   "build_linked_evidence_queue": {
     "name": "build_linked_evidence_queue",
     "safety": "narrow_write",
@@ -49,6 +54,11 @@
     "safety": "narrow_write",
     "returns_run_id": true
   },
+  "resolve_linked_evidence_reviews": {
+    "name": "resolve_linked_evidence_reviews",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
   "record_media_annotation": {
     "name": "record_media_annotation",
     "safety": "narrow_write",
@@ -63,6 +73,16 @@
     "name": "emit_cleanup_candidates",
     "safety": "narrow_write",
     "returns_run_id": true
+  },
+  "get_completion_audit": {
+    "name": "get_completion_audit",
+    "safety": "read",
+    "returns_run_id": false
+  },
+  "get_health_report": {
+    "name": "get_health_report",
+    "safety": "read",
+    "returns_run_id": false
   },
   "get_vault_page": {
     "name": "get_vault_page",

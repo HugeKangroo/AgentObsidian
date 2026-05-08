@@ -5,6 +5,7 @@ from pathlib import Path
 from knowledge_system.agent_synthesis import (
     apply_synthesis_draft_file,
     build_synthesis_context_pack,
+    select_target_page,
     SynthesisDraft,
     write_fixture_draft,
     write_agent_task_bundle,
@@ -45,6 +46,28 @@ def test_synthesis_context_recommends_anchor_page_update(tmp_path: Path) -> None
     assert result.action == "proposed_update"
     assert "vault/proposals" in result.vault_path.as_posix()
     assert result.page_id not in compiled.pages_by_id
+
+
+def test_select_target_page_prefers_maintained_non_source_anchor(tmp_path: Path) -> None:
+    project_root = tmp_path / "knowledge-system"
+    bookmarks_csv = Path(__file__).parents[2] / "data" / "bookmarks-classified.csv"
+    rebuild_sample_vault(project_root=project_root, bookmarks_csv=bookmarks_csv)
+    compiled = compile_vault(project_root)
+    candidate = {
+        "candidate_id": "candidate-agent-evaluation",
+        "page_ids": [
+            "source-x-2037590936234959355",
+            "learning-plan-agent-evaluation-readiness",
+            "concept-regression-eval",
+        ],
+    }
+
+    selection = select_target_page(compiled=compiled, candidate=candidate)
+
+    assert selection["target_page_id"] == "learning-plan-agent-evaluation-readiness"
+    assert selection["recommended_action"] == "update_existing_page"
+    assert selection["confidence"] > 0
+    assert "source-x-2037590936234959355" in selection["considered_page_ids"]
 
 
 def test_agent_synthesis_can_still_create_new_synthesis_page(tmp_path: Path) -> None:

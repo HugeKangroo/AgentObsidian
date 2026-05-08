@@ -13,13 +13,17 @@ from .agent_synthesis import (
     build_synthesis_context_pack,
     write_agent_task_bundle,
 )
+from .batch_intake import run_batch_intake as run_batch_intake_fn
 from .cleanup_readiness import build_cleanup_readiness as build_cleanup_readiness_fn
 from .cleanup_readiness import emit_cleanup_candidates as emit_cleanup_candidates_fn
+from .completion_audit import build_completion_audit as build_completion_audit_fn
 from .graph_index import compute_vault_graph, write_vault_graph
+from .health import build_health_report as build_health_report_fn
 from .linked_evidence import build_linked_evidence_queue as build_linked_evidence_queue_fn
 from .linked_evidence import build_linked_evidence_status as build_linked_evidence_status_fn
 from .linked_evidence import capture_linked_evidence_item as capture_linked_evidence_item_fn
 from .linked_evidence import record_linked_evidence_decision as record_linked_evidence_decision_fn
+from .linked_evidence import resolve_linked_evidence_reviews as resolve_linked_evidence_reviews_fn
 from .markdown_io import write_markdown_text
 from .media_annotations import record_media_annotation as record_media_annotation_fn
 from .proposals import (
@@ -111,6 +115,16 @@ def create_mcp_server(project_root: Path) -> FastMCP:
         }
 
     @mcp.tool()
+    def run_batch_intake(manifest_path: str) -> dict[str, Any]:
+        """Run a batch source intake manifest for webpage, PDF, repo, and media sources."""
+        result = run_batch_intake_fn(project_root=root, manifest_path=_resolve_under_root(root, manifest_path))
+        return {
+            "success_count": result.success_count,
+            "blocked_count": result.blocked_count,
+            "path": str(result.path),
+        }
+
+    @mcp.tool()
     def build_linked_evidence_queue() -> dict[str, Any]:
         """Build a generated queue of external and media evidence links that need follow-up capture or decisions."""
         compiled = compile_vault_fn(root)
@@ -176,6 +190,16 @@ def create_mcp_server(project_root: Path) -> FastMCP:
         }
 
     @mcp.tool()
+    def resolve_linked_evidence_reviews(reviewer: str = "") -> dict[str, Any]:
+        """Resolve parent missing-evidence review blockers after linked evidence has reviewed decisions."""
+        result = resolve_linked_evidence_reviews_fn(project_root=root, reviewer=reviewer)
+        return {
+            "resolved_count": result.resolved_count,
+            "skipped_count": result.skipped_count,
+            "path": str(result.path),
+        }
+
+    @mcp.tool()
     def record_media_annotation(
         source_id: str,
         caption: str,
@@ -224,6 +248,23 @@ def create_mcp_server(project_root: Path) -> FastMCP:
             "candidate_count": result.candidate_count,
             "path": str(result.path),
         }
+
+    @mcp.tool()
+    def get_completion_audit(eval_path: str = "", limit: int = 5) -> dict[str, Any]:
+        """Build and return the layered release-gate completion audit."""
+        target_eval_path = _resolve_under_root(root, eval_path) if eval_path else None
+        result = build_completion_audit_fn(project_root=root, eval_path=target_eval_path, limit=limit)
+        payload = json.loads(result.path.read_text(encoding="utf-8"))
+        payload["path"] = str(result.path)
+        return payload
+
+    @mcp.tool()
+    def get_health_report() -> dict[str, Any]:
+        """Build and return an operational health report for local agents."""
+        result = build_health_report_fn(project_root=root)
+        payload = json.loads(result.path.read_text(encoding="utf-8"))
+        payload["path"] = str(result.path)
+        return payload
 
     @mcp.tool()
     def get_vault_page(page_id: str) -> dict[str, Any]:

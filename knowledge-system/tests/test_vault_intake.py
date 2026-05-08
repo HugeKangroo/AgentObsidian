@@ -7,7 +7,12 @@ import subprocess
 import fitz
 
 from knowledge_system.cleanup_readiness import build_cleanup_readiness, emit_cleanup_candidates
-from knowledge_system.linked_evidence import build_linked_evidence_status, capture_linked_evidence_item, record_linked_evidence_decision
+from knowledge_system.linked_evidence import (
+    build_linked_evidence_status,
+    capture_linked_evidence_item,
+    record_linked_evidence_decision,
+    resolve_linked_evidence_reviews,
+)
 from knowledge_system.media_annotations import record_media_annotation
 from knowledge_system.search_index import vault_hybrid_search
 from knowledge_system.vault_compile import compile_vault
@@ -99,9 +104,13 @@ def test_vault_intake_pdf_and_repo_preserve_raw(tmp_path: Path) -> None:
     pdf = vault_intake_pdf(project_root=project_root, path=pdf_path, title="Optimization Primer", tags=["math"])
     repo = vault_intake_repo(project_root=project_root, path=repo_path, title="", tags=["modeling"])
     compiled = compile_vault(project_root)
+    pdf_manifest = json.loads(pdf.raw_manifest_path.read_text(encoding="utf-8"))
+    repo_manifest = json.loads(repo.raw_manifest_path.read_text(encoding="utf-8"))
 
     assert (project_root / "vault" / "raw" / "pdfs" / pdf.source_id / "raw.pdf").exists()
     assert (project_root / "vault" / "raw" / "repos" / repo.source_id / "capture.json").exists()
+    assert pdf_manifest["source_card_path"].endswith(f"source-{pdf.source_id}.md")
+    assert repo_manifest["source_card_path"].endswith(f"source-{repo.source_id}.md")
     assert pdf.primary_page_id in compiled.pages_by_id
     assert repo.primary_page_id in compiled.pages_by_id
 
@@ -125,6 +134,7 @@ def test_vault_intake_media_preserves_raw_asset_and_review_blocker(tmp_path: Pat
     assert result.source_id.startswith("media-")
     assert (project_root / "vault" / "raw" / "media" / result.source_id / "asset.png").exists()
     assert manifest["raw_path"].endswith("/asset.png")
+    assert manifest["source_card_path"].endswith(f"source-{result.source_id}.md")
     assert "![Raw media evidence]" in page.body
     assert any(review.source_id == result.source_id for review in compiled.reviews)
     assert not [issue for issue in compiled.lint_issues if issue.page_id == result.primary_page_id]
@@ -358,6 +368,54 @@ def test_linked_evidence_decision_records_auditable_status(tmp_path: Path) -> No
     assert status_item["decision_reviewer"] == "codex"
     assert status_item["decision_path"].endswith(".md")
     assert any(review.type == "linked_evidence_decision" for review in compiled.reviews)
+
+
+def test_resolve_linked_evidence_reviews_closes_parent_blockers_after_decisions(tmp_path: Path) -> None:
+    project_root = tmp_path / "knowledge-system"
+    bookmarks_csv = Path(__file__).parents[2] / "data" / "bookmarks-classified.csv"
+    media_path = tmp_path / "linked-diagram.png"
+    _write_png(media_path)
+    rebuild_sample_vault(project_root=project_root, bookmarks_csv=bookmarks_csv)
+    queue = json.loads((project_root / "vault" / "generated" / "linked_evidence_queue.json").read_text(encoding="utf-8"))
+    webpage_item = next(item for item in queue["items"] if item["source_id"] == "x-2037590936234959355" and item["kind"] == "external_link")
+    media_item = next(item for item in queue["items"] if item["source_id"] == "x-2037590936234959355" and item["kind"] == "media_link")
+    video_item = next(item for item in queue["items"] if item["source_id"] == "x-2051119679670976760")
+
+    capture_linked_evidence_item(project_root=project_root, item_id=webpage_item["id"], html=HTML)
+    capture_linked_evidence_item(project_root=project_root, item_id=media_item["id"], media_path=media_path)
+    capture_linked_evidence_item(project_root=project_root, item_id=video_item["id"], html="<html><body>X video shell</body></html>")
+    record_linked_evidence_decision(
+        project_root=project_root,
+        item_id=webpage_item["id"],
+        decision="reviewed",
+        rationale="Fixture webpage evidence was captured and reviewed.",
+        reviewer="codex",
+    )
+    record_linked_evidence_decision(
+        project_root=project_root,
+        item_id=media_item["id"],
+        decision="reviewed",
+        rationale="Fixture media evidence was captured and reviewed.",
+        reviewer="codex",
+    )
+    record_linked_evidence_decision(
+        project_root=project_root,
+        item_id=video_item["id"],
+        decision="needs_followup",
+        rationale="The fixture video shell does not preserve transcript evidence.",
+        reviewer="codex",
+    )
+
+    result = resolve_linked_evidence_reviews(project_root=project_root, reviewer="codex")
+    compiled = compile_vault(project_root)
+    reviews = {review.id: review for review in compiled.reviews}
+
+    assert result.resolved_count == 2
+    assert reviews["review-x-2037590936234959355-1"].status == "resolved"
+    assert reviews["review-x-2037590936234959355-1"].blocking is False
+    assert reviews["review-x-2037590936234959355-2"].status == "resolved"
+    assert reviews["review-x-2051119679670976760-1"].status == "pending"
+    assert reviews["review-x-2051119679670976760-1"].blocking is True
 
 
 def test_cleanup_readiness_blocks_sources_with_unresolved_evidence(tmp_path: Path) -> None:

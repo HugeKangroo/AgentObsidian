@@ -35,6 +35,7 @@ are audit context, not deletion or suppression rules.
 - `knowledge-system/vault/generated/`: rebuildable graph, search, review, and vector artifacts.
 - `docs/`: research, design, decisions, implementation plans, and verification records.
 - `STATUS.md`, `DECISIONS.md`, `KNOWN_ISSUES.md`: durable project status surfaces.
+- `COMPLETION_CRITERIA.md`: release-gate definition for what "100%" means.
 
 ## Setup
 
@@ -51,6 +52,18 @@ Run the test suite:
 
 ```powershell
 uv run --python 3.12 pytest
+```
+
+Run the release-gate completion audit:
+
+```powershell
+uv run --python 3.12 ks completion-audit --project-root .
+```
+
+Run the operational health check:
+
+```powershell
+uv run --python 3.12 ks health-check --project-root .
 ```
 
 Inspect the compiled vault state:
@@ -126,6 +139,12 @@ Record a reviewed, nonessential, or needs-followup decision for a linked evidenc
 uv run --python 3.12 ks linked-evidence-decision --project-root . --item-id <queue-item-id> --decision reviewed --rationale "Evidence was preserved and reviewed." --reviewer codex
 ```
 
+Resolve parent review blockers after linked evidence has been captured and reviewed:
+
+```powershell
+uv run --python 3.12 ks linked-evidence-resolve-reviews --project-root . --reviewer codex
+```
+
 Build the non-destructive source cleanup readiness report:
 
 ```powershell
@@ -155,6 +174,12 @@ Intake a local media file directly:
 
 ```powershell
 uv run --python 3.12 ks vault-intake-media --project-root . --path path\to\asset.png --title "Readable title"
+```
+
+Run a batch intake manifest:
+
+```powershell
+uv run --python 3.12 ks batch-intake --project-root . --manifest-path path\to\batch.json
 ```
 
 Record a human or agent media caption/interpretation and resolve matching media review blockers:

@@ -63,6 +63,13 @@ class LinkedEvidenceDecisionResult:
     decision: str
 
 
+@dataclass(frozen=True)
+class LinkedEvidenceReviewResolutionResult:
+    path: Path
+    resolved_count: int
+    skipped_count: int
+
+
 def build_linked_evidence_queue(
     project_root: Path,
     compiled: CompiledVault | None = None,
@@ -175,6 +182,73 @@ def record_linked_evidence_decision(
     )
     build_linked_evidence_status(project_root)
     return LinkedEvidenceDecisionResult(path=path, queue_item_id=item.id, decision=normalized_decision)
+
+
+def resolve_linked_evidence_reviews(project_root: Path, reviewer: str = "") -> LinkedEvidenceReviewResolutionResult:
+    status = build_linked_evidence_status(project_root)
+    status_payload = json.loads(status.path.read_text(encoding="utf-8"))
+    items_by_source_kind: dict[tuple[str, str], list[dict[str, Any]]] = {}
+    for item in status_payload.get("items", []):
+        source_id = str(item.get("source_id") or "")
+        kind = str(item.get("kind") or "")
+        if source_id and kind:
+            items_by_source_kind.setdefault((source_id, kind), []).append(item)
+
+    resolved: list[dict[str, str]] = []
+    skipped: list[dict[str, str]] = []
+    reviews_root = project_root / "vault" / "reviews"
+    for path in sorted(reviews_root.glob("review-*.md")):
+        parsed = parse_markdown_file(path)
+        if parsed.frontmatter.get("type") != "missing_evidence":
+            continue
+        if parsed.frontmatter.get("status") != "pending":
+            continue
+        source_id = str(parsed.frontmatter.get("source_id") or "")
+        required_kind = _required_linked_kind(parsed.body)
+        if not source_id or not required_kind:
+            skipped.append({"review_id": str(parsed.frontmatter.get("id") or path.stem), "reason": "not_linked_evidence_review"})
+            continue
+        items = items_by_source_kind.get((source_id, required_kind), [])
+        if not _linked_items_resolve_review(items):
+            skipped.append({"review_id": str(parsed.frontmatter.get("id") or path.stem), "reason": "linked_evidence_not_reviewed"})
+            continue
+        resolved_at = datetime.now(timezone.utc).isoformat()
+        frontmatter = dict(parsed.frontmatter)
+        frontmatter["status"] = "resolved"
+        frontmatter["blocking"] = False
+        frontmatter["resolved_at"] = resolved_at
+        frontmatter["reviewer"] = reviewer
+        frontmatter["updated"] = resolved_at[:10]
+        reviewed_item_ids = ", ".join(f"`{item.get('id')}`" for item in items)
+        resolution_body = (
+            parsed.body.rstrip()
+            + "\n\n## Resolution\n\n"
+            + "Resolved by linked evidence capture and decision review.\n\n"
+            + f"- Required kind: `{required_kind}`\n"
+            + f"- Reviewed linked items: {reviewed_item_ids}\n"
+            + f"- Reviewer: {reviewer or 'Unspecified'}\n"
+        )
+        path.write_text(write_markdown_text(frontmatter, resolution_body), encoding="utf-8")
+        resolved.append({"review_id": str(frontmatter.get("id") or path.stem), "path": _relative(project_root, path)})
+
+    report_path = project_root / "vault" / "generated" / "linked_evidence_review_resolution.json"
+    report_path.parent.mkdir(parents=True, exist_ok=True)
+    report_path.write_text(
+        json.dumps(
+            {
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "resolved_count": len(resolved),
+                "skipped_count": len(skipped),
+                "resolved": resolved,
+                "skipped": skipped,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    compile_vault(project_root)
+    return LinkedEvidenceReviewResolutionResult(path=report_path, resolved_count=len(resolved), skipped_count=len(skipped))
 
 
 def capture_linked_evidence_item(
@@ -558,3 +632,28 @@ def _rationale_from_decision_body(body: str) -> str:
     if "## " in tail:
         tail = tail.split("## ", 1)[0]
     return tail.strip()
+
+
+def _required_linked_kind(body: str) -> str:
+    normalized = body.lower()
+    if "media links" in normalized or "media evidence" in normalized:
+        return "media_link"
+    if "external linked evidence" in normalized or "video or transcript" in normalized:
+        return "external_link"
+    return ""
+
+
+def _linked_items_resolve_review(items: list[dict[str, Any]]) -> bool:
+    if not items:
+        return False
+    for item in items:
+        decision = str(item.get("decision") or "")
+        status = str(item.get("status") or "")
+        if decision == "needs_followup":
+            return False
+        if decision == "nonessential":
+            continue
+        if decision == "reviewed" and status == "captured":
+            continue
+        return False
+    return True

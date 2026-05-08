@@ -11,13 +11,17 @@ from .agent_synthesis import (
     write_agent_task_bundle,
     write_fixture_draft,
 )
+from .batch_intake import run_batch_intake
 from .cleanup_readiness import build_cleanup_readiness, emit_cleanup_candidates
+from .completion_audit import build_completion_audit
 from .graph_index import write_vault_graph
+from .health import build_health_report
 from .linked_evidence import (
     build_linked_evidence_queue,
     build_linked_evidence_status,
     capture_linked_evidence_item,
     record_linked_evidence_decision,
+    resolve_linked_evidence_reviews,
 )
 from .media_annotations import record_media_annotation
 from .mcp_config import ClientName, tool_contract_summary, write_client_configs
@@ -128,6 +132,15 @@ def vault_intake_media_command(
     typer.echo(
         f"run_id={result.run_id} source_id={result.source_id} primary_page_id={result.primary_page_id} raw={result.raw_manifest_path} source_card={result.source_card_path} source_decision={result.source_score.get('decision')}"
     )
+
+
+@app.command("batch-intake")
+def batch_intake_command(
+    project_root: Path = typer.Option(Path("knowledge-system")),
+    manifest_path: Path = typer.Option(...),
+) -> None:
+    result = run_batch_intake(project_root=project_root, manifest_path=manifest_path)
+    typer.echo(f"success={result.success_count} blocked={result.blocked_count} report={result.path}")
 
 
 @app.command("intake-webpage")
@@ -286,6 +299,15 @@ def linked_evidence_decision_command(
     typer.echo(f"item_id={result.queue_item_id} decision={result.decision} path={result.path}")
 
 
+@app.command("linked-evidence-resolve-reviews")
+def linked_evidence_resolve_reviews_command(
+    project_root: Path = typer.Option(Path("knowledge-system")),
+    reviewer: str = typer.Option(""),
+) -> None:
+    result = resolve_linked_evidence_reviews(project_root=project_root, reviewer=reviewer)
+    typer.echo(f"resolved={result.resolved_count} skipped={result.skipped_count} report={result.path}")
+
+
 @app.command("media-annotate")
 def media_annotate_command(
     project_root: Path = typer.Option(Path("knowledge-system")),
@@ -334,6 +356,26 @@ def cleanup_candidates_command(
 ) -> None:
     result = emit_cleanup_candidates(project_root=project_root, reviewer=reviewer)
     typer.echo(f"candidates={result.candidate_count} report={result.path}")
+
+
+@app.command("completion-audit")
+def completion_audit_command(
+    project_root: Path = typer.Option(Path("knowledge-system")),
+    eval_path: Path | None = typer.Option(None),
+    limit: int = typer.Option(5),
+) -> None:
+    result = build_completion_audit(project_root=project_root, eval_path=eval_path, limit=limit)
+    typer.echo(
+        f"overall={result.overall_percent} layers={result.layer_count} blocking={result.blocking_count} report={result.path}"
+    )
+
+
+@app.command("health-check")
+def health_check_command(
+    project_root: Path = typer.Option(Path("knowledge-system")),
+) -> None:
+    result = build_health_report(project_root=project_root)
+    typer.echo(f"status={result.status} completion={result.overall_percent} report={result.path}")
 
 
 @app.command("vector-reindex")

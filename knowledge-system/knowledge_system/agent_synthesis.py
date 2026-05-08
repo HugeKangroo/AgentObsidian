@@ -123,6 +123,7 @@ def build_synthesis_context_pack(project_root: Path, candidate_id: str | None = 
     compiled = compile_vault(project_root)
     graph = compute_vault_graph(compiled)
     candidate = _select_candidate(graph, candidate_id)
+    candidate = {**candidate, **select_target_page(compiled=compiled, candidate=candidate)}
     page_ids = [page_id for page_id in candidate["page_ids"] if page_id in compiled.pages_by_id]
     pages = [compiled.pages_by_id[page_id] for page_id in page_ids]
     source_ids = sorted({source_id for page in pages for source_id in page.sources})
@@ -156,6 +157,50 @@ def build_synthesis_context_pack(project_root: Path, candidate_id: str | None = 
         ],
         output_schema=SynthesisDraft.model_json_schema(),
     )
+
+
+def select_target_page(compiled: CompiledVault, candidate: dict[str, Any]) -> dict[str, Any]:
+    page_ids = [page_id for page_id in candidate.get("page_ids", []) if page_id in compiled.pages_by_id]
+    scored = []
+    for page_id in page_ids:
+        page = compiled.pages_by_id[page_id]
+        score = _target_page_score(page, compiled)
+        scored.append(
+            {
+                "page_id": page.id,
+                "title": page.title,
+                "type": page.type,
+                "score": round(score, 4),
+            }
+        )
+    scored.sort(key=lambda item: (-float(item["score"]), str(item["title"]), str(item["page_id"])))
+    if not scored or float(scored[0]["score"]) <= 0:
+        return {
+            "recommended_action": "create_synthesis_page",
+            "target_page_id": "",
+            "target_page_selection": {
+                "confidence": 0.0,
+                "rationale": "No maintained non-source anchor page was available for a reviewed update.",
+                "candidates": scored,
+            },
+            "considered_page_ids": page_ids,
+        }
+    winner = scored[0]
+    confidence = round(min(1.0, float(winner["score"]) / 10.0), 3)
+    return {
+        "recommended_action": "update_existing_page",
+        "target_page_id": str(winner["page_id"]),
+        "target_page_selection": {
+            "confidence": confidence,
+            "rationale": (
+                f"Selected `{winner['page_id']}` because it is the strongest maintained anchor "
+                "among the candidate pages."
+            ),
+            "candidates": scored,
+        },
+        "confidence": confidence,
+        "considered_page_ids": page_ids,
+    }
 
 
 def write_agent_task_bundle(project_root: Path, context_pack: SynthesisContextPack) -> AgentTaskBundle:
@@ -310,6 +355,27 @@ def _select_candidate(graph: dict[str, Any], candidate_id: str | None) -> dict[s
         if candidate["candidate_id"] == candidate_id:
             return candidate
     raise ValueError(f"Synthesis candidate not found: {candidate_id}")
+
+
+def _target_page_score(page: CompiledPage, compiled: CompiledVault) -> float:
+    type_scores = {
+        "learning_plan": 8.0,
+        "tool": 7.5,
+        "playbook": 7.0,
+        "prompt_template": 6.5,
+        "math": 6.0,
+        "modeling": 6.0,
+        "article": 5.0,
+        "concept": 2.0,
+        "source": -5.0,
+        "map": -6.0,
+        "synthesis": -3.0,
+    }
+    backlink_count = len(compiled.backlinks.get(page.id, []))
+    source_bonus = min(1.0, len(page.sources) * 0.25)
+    backlink_bonus = min(1.0, backlink_count * 0.1)
+    body_bonus = min(0.5, len(page.body) / 4000)
+    return type_scores.get(page.type, 1.0) + source_bonus + backlink_bonus + body_bonus
 
 
 def _context_page(page: CompiledPage, compiled: CompiledVault) -> SynthesisContextPage:
