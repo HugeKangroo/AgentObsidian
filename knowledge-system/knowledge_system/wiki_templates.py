@@ -14,6 +14,7 @@ This vault is a local LLM Wiki implemented as an Obsidian-readable knowledge sys
 ## Operating Rules
 
 - Preserve raw evidence before integrating knowledge.
+- Treat normalized info as the processing input. Source cards are provenance and backlink anchors, not the knowledge target.
 - Update existing concept, math, modeling, method, synthesis, and question pages when new evidence improves them.
 - Use `[[wikilinks]]`, aliases, maps of content, source cards, and review pages so Obsidian backlinks and Graph View remain useful.
 - Keep formulas readable with explanatory prose.
@@ -31,10 +32,11 @@ def vault_index() -> str:
 
 - [[Agent Systems]]
 - [[Mathematics And Modeling]]
+- [[X Bookmark Intake]]
 
 ## Core Folders
 
-- `wiki/sources/`: source cards and provenance anchors.
+- `wiki/sources/`: provenance cards for raw info inputs.
 - `wiki/concepts/`: reusable concepts.
 - `wiki/methods/`: tools, playbooks, learning plans, and prompt templates.
 - `wiki/questions/`: open research questions.
@@ -74,7 +76,7 @@ def source_card(
 
 ## Why This Was Saved
 
-This source is connected to [[{primary_title}]] and should be integrated before any bookmark cleanup decision.
+This source card preserves provenance for an info input in [[{primary_title}]]. Process the info text and evidence directly before any bookmark cleanup decision.
 
 ## Original
 
@@ -90,7 +92,7 @@ This source is connected to [[{primary_title}]] and should be integrated before 
 
 ## Source Text
 
-{source.raw_text or source.title}
+{_literal_block(source.raw_text or source.title)}
 
 ## External Links
 
@@ -320,6 +322,39 @@ def math_modeling_map() -> tuple[dict[str, object], str]:
     return frontmatter, body
 
 
+def x_bookmark_intake_map() -> tuple[dict[str, object], str]:
+    frontmatter = {
+        "id": "map-x-bookmark-intake",
+        "title": "X Bookmark Intake",
+        "type": "map",
+        "tags": ["map", "source-intake", "x-bookmark"],
+        "updated": str(date.today()),
+    }
+    body = """# X Bookmark Intake
+
+## Purpose
+
+This map collects local X bookmark captures that have entered the vault as raw evidence and source cards.
+
+## Lifecycle
+
+| Stage | Meaning |
+|---|---|
+| Raw capture | The original bookmark text, links, media URLs, and metadata are preserved under `raw/x-bookmarks/`. |
+| Info input | The bookmark becomes a normalized info unit that agents process directly into concept, math, modeling, method, or synthesis pages. |
+| Source card | A human-readable source page records provenance, intake score, original text, external links, and media links. It is an evidence anchor, not the target summary. |
+| Review | Missing linked evidence, media interpretation, or video/thread context remains visible as blockers or queue items. |
+| Synthesis | Local agents should process info into updates for concept, math, modeling, method, or synthesis pages through proposals instead of creating isolated notes. |
+| Cleanup | Cleanup candidates are non-destructive handoff signals for a separate X bookmark cleanup workflow. |
+
+## Related Maps
+
+- Agent Systems
+- Mathematics And Modeling
+"""
+    return frontmatter, body
+
+
 def _page_id_for(source: SourceRecord, page_type: str) -> str:
     from .processors import page_id_for
 
@@ -338,6 +373,13 @@ def _source_excerpt(source: SourceRecord, length: int = 500) -> str:
         text = text.replace(old, new)
     text = " ".join(text.split())
     return text[:length] + ("..." if len(text) > length else "")
+
+
+def _literal_block(text: str) -> str:
+    fence = "```"
+    while fence in text:
+        fence += "`"
+    return f"{fence}text\n{text}\n{fence}"
 
 
 def _relative_vault_asset(raw_asset_path: str) -> str:

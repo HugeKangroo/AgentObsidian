@@ -49,6 +49,9 @@ def test_codex_config_toml_matches_codex_mcp_shape(tmp_path: Path) -> None:
     assert "emit_cleanup_candidates" in server["enabled_tools"]
     assert "get_completion_audit" in server["enabled_tools"]
     assert "run_batch_intake" in server["enabled_tools"]
+    assert "import_x_bookmarks" in server["enabled_tools"]
+    assert "prepare_info_task" in server["enabled_tools"]
+    assert "apply_info_draft" in server["enabled_tools"]
     assert "get_health_report" in server["enabled_tools"]
 
 
@@ -73,6 +76,9 @@ def test_codex_read_only_config_limits_enabled_tools(tmp_path: Path) -> None:
     assert "emit_cleanup_candidates" not in enabled_tools
     assert "get_completion_audit" in enabled_tools
     assert "run_batch_intake" not in enabled_tools
+    assert "import_x_bookmarks" not in enabled_tools
+    assert "prepare_info_task" not in enabled_tools
+    assert "apply_info_draft" not in enabled_tools
     assert "get_health_report" in enabled_tools
     assert all(item["safety"] == "read" for item in tool_contract_summary(read_only=True))
 

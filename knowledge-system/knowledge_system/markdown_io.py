@@ -12,6 +12,8 @@ WIKILINK_RE = re.compile(r"(?<!!)\[\[([^\]|#]+)(?:#[^\]|]+)?(?:\|([^\]]+))?\]\]"
 EMBED_RE = re.compile(r"!\[\[([^\]]+)\]\]")
 INLINE_TAG_RE = re.compile(r"(?<![\w/])#([A-Za-z0-9_\-/\u4e00-\u9fff]+)")
 CALLOUT_RE = re.compile(r"^>\s*\[!([A-Za-z0-9_-]+)\]\s*(.*)$", re.MULTILINE)
+FRONTMATTER_RE = re.compile(r"\A---[ \t]*\r?\n(.*?)\r?\n---[ \t]*(?:\r?\n|$)", re.DOTALL)
+FENCED_CODE_RE = re.compile(r"(^|\n)(`{3,}|~{3,})[^\n]*\n.*?\n\2[ \t]*(?=\n|$)", re.DOTALL)
 
 
 @dataclass(frozen=True)
@@ -44,23 +46,23 @@ def parse_markdown_file(path: Path) -> ParsedMarkdown:
 def parse_markdown_text(text: str) -> ParsedMarkdown:
     frontmatter: dict[str, Any] = {}
     body = text
-    if text.startswith("---\n"):
-        parts = text.split("---", 2)
-        if len(parts) == 3:
-            frontmatter = yaml.safe_load(parts[1]) or {}
-            if not isinstance(frontmatter, dict):
-                raise ValueError("YAML frontmatter must be a mapping.")
-            body = parts[2].lstrip("\n")
+    match = FRONTMATTER_RE.match(text)
+    if match:
+        frontmatter = yaml.safe_load(match.group(1)) or {}
+        if not isinstance(frontmatter, dict):
+            raise ValueError("YAML frontmatter must be a mapping.")
+        body = text[match.end() :].lstrip("\r\n")
     aliases = frontmatter.get("aliases") or []
     if isinstance(aliases, str):
         aliases = [aliases]
+    link_body = _strip_fenced_code(body)
     return ParsedMarkdown(
         frontmatter=frontmatter,
         body=body,
-        wikilinks=extract_wikilinks(body),
-        embeds=extract_embeds(body),
-        inline_tags=extract_inline_tags(body),
-        callouts=extract_callouts(body),
+        wikilinks=extract_wikilinks(link_body),
+        embeds=extract_embeds(link_body),
+        inline_tags=extract_inline_tags(link_body),
+        callouts=extract_callouts(link_body),
         aliases=[str(alias) for alias in aliases],
     )
 
@@ -105,3 +107,7 @@ def extract_callouts(body: str) -> list[Callout]:
         Callout(kind=match.group(1).lower(), title=match.group(2).strip())
         for match in CALLOUT_RE.finditer(body)
     ]
+
+
+def _strip_fenced_code(body: str) -> str:
+    return FENCED_CODE_RE.sub("\n", body)

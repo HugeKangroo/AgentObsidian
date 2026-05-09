@@ -17,6 +17,13 @@ from .cleanup_readiness import build_cleanup_readiness, emit_cleanup_candidates
 from .completion_audit import build_completion_audit
 from .graph_index import write_vault_graph
 from .health import build_health_report
+from .info_processing import (
+    apply_info_distillation_draft_file,
+    build_info_context_pack,
+    load_info_context_pack,
+    write_fixture_info_draft,
+    write_info_task_bundle,
+)
 from .linked_evidence import (
     build_linked_evidence_queue,
     build_linked_evidence_status,
@@ -36,7 +43,14 @@ from .search_index import (
     write_retrieval_trace,
 )
 from .vault_compile import compile_vault
-from .vault_pipeline import rebuild_sample_vault, vault_intake_media, vault_intake_pdf, vault_intake_repo, vault_intake_webpage
+from .vault_pipeline import (
+    import_x_bookmarks_to_vault,
+    rebuild_sample_vault,
+    vault_intake_media,
+    vault_intake_pdf,
+    vault_intake_repo,
+    vault_intake_webpage,
+)
 
 app = typer.Typer(help="Local LLM Wiki vault commands.")
 
@@ -89,6 +103,69 @@ def vault_rebuild_samples_command(
 ) -> None:
     result = rebuild_sample_vault(project_root=project_root, bookmarks_csv=bookmarks_csv)
     typer.echo(f"sources={result.source_count} pages={result.page_count} reviews={result.review_count}")
+
+
+@app.command("vault-import-x-bookmarks")
+def vault_import_x_bookmarks_command(
+    project_root: Path = typer.Option(Path("knowledge-system")),
+    bookmarks_csv: Path = typer.Option(Path("../data/bookmarks-classified.csv")),
+    limit: int | None = typer.Option(None),
+    offset: int = typer.Option(0),
+    dry_run: bool = typer.Option(False, "--dry-run"),
+    overwrite: bool = typer.Option(False, "--overwrite"),
+) -> None:
+    result = import_x_bookmarks_to_vault(
+        project_root=project_root,
+        bookmarks_csv=bookmarks_csv,
+        limit=limit,
+        offset=offset,
+        dry_run=dry_run,
+        overwrite=overwrite,
+    )
+    report = f" report={result.report_path}" if result.report_path else ""
+    typer.echo(f"sources={result.source_count} skipped_existing={result.skipped_existing_count} dry_run={result.dry_run}{report}")
+
+
+@app.command("info-prepare")
+def info_prepare_command(
+    project_root: Path = typer.Option(Path("knowledge-system")),
+    query: str = typer.Option(""),
+    info_id: list[str] | None = typer.Option(None, "--info-id"),
+    limit: int = typer.Option(5),
+    target_page_id: str = typer.Option(""),
+    page_type: str = typer.Option("synthesis"),
+) -> None:
+    context_pack = build_info_context_pack(
+        project_root=project_root,
+        query=query,
+        info_ids=info_id or [],
+        limit=limit,
+        target_page_id=target_page_id,
+        page_type=page_type,
+    )
+    bundle = write_info_task_bundle(project_root=project_root, context_pack=context_pack)
+    typer.echo(f"run_id={bundle.run_id} info_units={len(context_pack.info_units)} context={bundle.context_path} task={bundle.task_path}")
+
+
+@app.command("info-fixture-draft")
+def info_fixture_draft_command(
+    project_root: Path = typer.Option(Path("knowledge-system")),
+    context_path: Path = typer.Option(...),
+) -> None:
+    context_pack = load_info_context_pack(context_path)
+    draft_path = write_fixture_info_draft(project_root=project_root, context_pack=context_pack)
+    typer.echo(f"draft={draft_path}")
+
+
+@app.command("info-apply")
+def info_apply_command(
+    project_root: Path = typer.Option(Path("knowledge-system")),
+    draft_path: Path = typer.Option(...),
+) -> None:
+    result = apply_info_distillation_draft_file(project_root=project_root, draft_path=draft_path)
+    typer.echo(
+        f"page_id={result.page_id} action={result.action} status={result.status} reviews={result.review_count} path={result.vault_path} result={result.apply_result_path}"
+    )
 
 
 @app.command("vault-intake-webpage")

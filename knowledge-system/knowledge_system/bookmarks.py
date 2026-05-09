@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import re
+from collections.abc import Iterable
 from pathlib import Path
 
 from .models import SourceRecord
@@ -53,18 +54,28 @@ def processor_for(row: dict[str, str]) -> str:
     return "playbook_extractor"
 
 
-def load_sample_sources(bookmarks_csv: Path) -> list[SourceRecord]:
-    wanted = set(SAMPLE_STATUS_IDS)
+def load_bookmark_sources(
+    bookmarks_csv: Path,
+    selected_status_ids: Iterable[str] | None = None,
+    limit: int | None = None,
+    offset: int = 0,
+) -> list[SourceRecord]:
+    selected = list(selected_status_ids or [])
+    wanted = set(selected)
     sources: list[SourceRecord] = []
+    seen: set[str] = set()
     with bookmarks_csv.open("r", encoding="utf-8-sig", newline="") as handle:
         for row in csv.DictReader(handle):
             row_id = status_id_from_url(row["url"])
-            if row_id not in wanted:
+            if wanted and row_id not in wanted:
+                continue
+            source_id = f"x-{row_id}"
+            if source_id in seen:
                 continue
             raw_text, external_links, image_links = parse_notes(row.get("notes", ""))
             sources.append(
                 SourceRecord(
-                    id=f"x-{row_id}",
+                    id=source_id,
                     uri=row["url"],
                     title=row.get("title", "").strip() or row_id,
                     author=row.get("author", ""),
@@ -80,6 +91,16 @@ def load_sample_sources(bookmarks_csv: Path) -> list[SourceRecord]:
                     archived_path=row.get("archived_path", ""),
                 )
             )
-    order = {f"x-{sample_id}": idx for idx, sample_id in enumerate(SAMPLE_STATUS_IDS)}
-    return sorted(sources, key=lambda item: order[item.id])
+            seen.add(source_id)
+    if wanted:
+        order = {f"x-{sample_id}": idx for idx, sample_id in enumerate(selected)}
+        sources = sorted(sources, key=lambda item: order[item.id])
+    if offset:
+        sources = sources[offset:]
+    if limit is not None:
+        sources = sources[:limit]
+    return sources
 
+
+def load_sample_sources(bookmarks_csv: Path) -> list[SourceRecord]:
+    return load_bookmark_sources(bookmarks_csv, selected_status_ids=SAMPLE_STATUS_IDS)

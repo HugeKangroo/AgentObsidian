@@ -34,6 +34,21 @@
     "safety": "narrow_write",
     "returns_run_id": true
   },
+  "import_x_bookmarks": {
+    "name": "import_x_bookmarks",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "prepare_info_task": {
+    "name": "prepare_info_task",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
+  "apply_info_draft": {
+    "name": "apply_info_draft",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
   "build_linked_evidence_queue": {
     "name": "build_linked_evidence_queue",
     "safety": "narrow_write",

@@ -5,6 +5,7 @@ This vault is a local LLM Wiki implemented as an Obsidian-readable knowledge sys
 ## Operating Rules
 
 - Preserve raw evidence before integrating knowledge.
+- Treat normalized info as the processing input. Source cards are provenance and backlink anchors, not the knowledge target.
 - Update existing concept, math, modeling, method, synthesis, and question pages when new evidence improves them.
 - Use `[[wikilinks]]`, aliases, maps of content, source cards, and review pages so Obsidian backlinks and Graph View remain useful.
 - Keep formulas readable with explanatory prose.

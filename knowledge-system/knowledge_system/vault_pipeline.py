@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from datetime import datetime, timezone
 import json
 from pathlib import Path
 
-from .bookmarks import load_sample_sources
+from .bookmarks import load_bookmark_sources, load_sample_sources
 from .intake import IntakePipeline, MediaSourceInput, PdfSourceInput, RepoSourceInput, WebpageSourceInput
 from .linked_evidence import build_linked_evidence_queue
 from .models import SourceRecord
-from .paths import resolve_project_reference, vault_reference
+from .paths import resolve_project_reference, resolve_vault_path, vault_reference
 from .processors import missing_evidence, page_id_for, processor_shape
 from .search_index import build_search_index
 from .source_scoring import score_source
@@ -22,6 +23,7 @@ from .wiki_templates import (
     media_evidence_page,
     review_page,
     source_card,
+    x_bookmark_intake_map,
 )
 
 
@@ -40,6 +42,14 @@ class VaultIntakeResult:
     raw_manifest_path: Path
     source_card_path: Path
     source_score: dict[str, object]
+
+
+@dataclass(frozen=True)
+class XBookmarkImportResult:
+    source_count: int
+    skipped_existing_count: int
+    dry_run: bool
+    report_path: Path | None
 
 
 def rebuild_sample_vault(project_root: Path, bookmarks_csv: Path) -> VaultRebuildResult:
@@ -84,6 +94,89 @@ def rebuild_sample_vault(project_root: Path, bookmarks_csv: Path) -> VaultRebuil
     build_search_index(project_root, compiled)
     build_linked_evidence_queue(project_root, compiled)
     return VaultRebuildResult(source_count=len(sources), page_count=page_count, review_count=review_count)
+
+
+def import_x_bookmarks_to_vault(
+    project_root: Path,
+    bookmarks_csv: Path,
+    limit: int | None = None,
+    offset: int = 0,
+    dry_run: bool = False,
+    overwrite: bool = False,
+) -> XBookmarkImportResult:
+    sources = load_bookmark_sources(bookmarks_csv=bookmarks_csv, limit=limit, offset=offset)
+    if dry_run:
+        return XBookmarkImportResult(source_count=len(sources), skipped_existing_count=0, dry_run=True, report_path=None)
+
+    store = VaultStore(project_root)
+    store.prepare()
+    _write_x_bookmark_map(store)
+    compiled = compile_vault(project_root)
+    existing_titles = {" ".join(page.title.lower().split()) for page in compiled.pages}
+    existing_uris = {str(item.get("uri")) for item in compiled.raw_captures if item.get("uri")}
+
+    imported = []
+    skipped_existing = []
+    for source in sources:
+        source_card_relative = f"vault/wiki/sources/source-{source.id}.md"
+        source_path = store.vault / "wiki" / "sources" / f"source-{source.id}.md"
+        if source_path.exists() and not overwrite:
+            skipped_existing.append(source.id)
+            continue
+        raw_manifest = store.write_raw_x_bookmark(source, source_card_relative)
+        source_score = score_source(source, existing_titles=existing_titles, existing_uris=existing_uris)
+        source_frontmatter, source_body = source_card(source, "X Bookmark Intake", raw_manifest, source_score)
+        source_path = store.write_markdown(f"wiki/sources/source-{source.id}.md", source_frontmatter, source_body)
+        raw_manifest_path = resolve_project_reference(project_root, raw_manifest)
+        _write_source_card_backref(raw_manifest_path, source_path, project_root)
+        existing_titles.add(" ".join(source.title.lower().split()))
+        existing_uris.add(source.uri)
+        imported.append(
+            {
+                "source_id": source.id,
+                "uri": source.uri,
+                "title": source.title,
+                "source_card_path": vault_reference(project_root, source_path),
+                "raw_manifest_path": raw_manifest,
+                "source_decision": source_score.decision,
+            }
+        )
+
+    compiled = compile_vault(project_root)
+    build_search_index(project_root, compiled)
+    build_linked_evidence_queue(project_root, compiled)
+    report_dir = resolve_vault_path(project_root) / "generated" / "x_bookmark_imports"
+    report_dir.mkdir(parents=True, exist_ok=True)
+    report_path = report_dir / f"import-{datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%S%fZ')}.json"
+    report_path.write_text(
+        json.dumps(
+            {
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "bookmarks_csv": str(bookmarks_csv.resolve()),
+                "source_count": len(imported),
+                "skipped_existing_count": len(skipped_existing),
+                "offset": offset,
+                "limit": limit,
+                "overwrite": overwrite,
+                "skipped_existing": skipped_existing,
+                "items": imported,
+            },
+            ensure_ascii=False,
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    latest_path = report_dir / "latest.json"
+    latest_path.write_text(report_path.read_text(encoding="utf-8"), encoding="utf-8")
+    store.append_log(
+        f"imported {len(imported)} local X bookmark captures from {bookmarks_csv.name} into [[X Bookmark Intake]]; skipped {len(skipped_existing)} existing source cards"
+    )
+    return XBookmarkImportResult(
+        source_count=len(imported),
+        skipped_existing_count=len(skipped_existing),
+        dry_run=False,
+        report_path=report_path,
+    )
 
 
 def vault_intake_webpage(
@@ -189,9 +282,15 @@ def _write_maps(store: VaultStore) -> None:
     for relative, template in [
         ("maps/agent-systems.md", agent_systems_map),
         ("maps/mathematics-and-modeling.md", math_modeling_map),
+        ("maps/x-bookmark-intake.md", x_bookmark_intake_map),
     ]:
         frontmatter, body = template()
         store.write_markdown(relative, frontmatter, body)
+
+
+def _write_x_bookmark_map(store: VaultStore) -> None:
+    frontmatter, body = x_bookmark_intake_map()
+    store.write_markdown("maps/x-bookmark-intake.md", frontmatter, body)
 
 
 def _write_source_card_backref(manifest_path: Path, source_path: Path, project_root: Path) -> None:

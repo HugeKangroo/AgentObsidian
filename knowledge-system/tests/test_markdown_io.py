@@ -63,6 +63,34 @@ def test_write_markdown_round_trips_frontmatter_and_body() -> None:
     assert parsed.body.startswith("# Objective")
 
 
+def test_parse_frontmatter_uses_delimiter_lines_not_body_dashes() -> None:
+    text = write_markdown_text(
+        {
+            "id": "source-with-dashes",
+            "title": "Source: 中国的农业、农村、农民问题 --- 参考",
+            "type": "source",
+        },
+        "# Source\n\nThe body may also contain --- separators without ending frontmatter.\n",
+    )
+
+    parsed = parse_markdown_text(text)
+
+    assert parsed.frontmatter["title"] == "Source: 中国的农业、农村、农民问题 --- 参考"
+    assert "--- separators" in parsed.body
+
+
+def test_extractors_ignore_fenced_code_literals() -> None:
+    parsed = parse_markdown_text(
+        "---\nid: source-regex\ntitle: Regex Source\ntype: source\n---\n\n"
+        "# Source\n\n"
+        "```text\n[[:space:]] should remain literal, not a wikilink. #literal\n```\n\n"
+        "Outside code links to [[X Bookmark Intake]].\n"
+    )
+
+    assert [link.target for link in parsed.wikilinks] == ["X Bookmark Intake"]
+    assert "literal" not in parsed.inline_tags
+
+
 def test_extractors_handle_plain_body_without_frontmatter() -> None:
     body = "Connect [[Variables]] to [[Constraints|constraints]]. ![[diagram.svg]] #math"
 

@@ -54,3 +54,5 @@ updated: '2026-05-05'
 - 2026-05-08: recorded media annotation media-annotation-media-edd755f299aa-20260508T125203017222Z for [[Linked Media Evidence - x-2049534755729707205 - HHFnyLpaEAArswH]]
 - 2026-05-08: recorded media annotation media-annotation-media-5db1dad6d77c-20260508T125209442166Z for [[Linked Media Evidence - x-2051248243871498700 - HHd_VIUbIAATjy7]]
 - 2026-05-08: recorded media annotation media-annotation-media-3b95dceb95ec-20260508T125216872381Z for [[Linked Media Evidence - x-2051248243871498700 - HHd_Zw-bEAAnRLf]]
+- 2026-05-08: imported 1980 local X bookmark captures from bookmarks-classified.csv into [[X Bookmark Intake]]; skipped 6 existing source cards
+- 2026-05-09: applied info distillation draft [[Agent Evaluation Readiness Feedback Loop]] with 3 review blockers

@@ -17,6 +17,7 @@ The product's job is to change this reality:
 ```text
 scattered local and web evidence
 -> preserved raw material
+-> normalized info inputs
 -> reusable human-readable knowledge
 -> explicit uncertainty and review
 -> agent-operable retrieval and synthesis
@@ -25,8 +26,9 @@ scattered local and web evidence
 Therefore the necessary truth layers are:
 
 1. Immutable evidence.
-2. Maintained wiki pages.
-3. Review and operation history.
+2. Normalized info inputs.
+3. Maintained wiki pages.
+4. Review and operation history.
 
 Everything else is derived support:
 
@@ -114,11 +116,11 @@ DerivedIndex
 
 IntakeAdapters
   capture webpage/PDF/repo/X/local-file evidence
-  write raw artifacts and source cards
+  write raw artifacts and source-card provenance views
   create proposed page updates and blockers
 
 AgentTaskLayer
-  builds context packs and task bundles for Codex/Claude Code
+  builds info and synthesis context packs and task bundles for Codex/Claude Code
   validates agent output schemas
   applies accepted edits as vault writes
 

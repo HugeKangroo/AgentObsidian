@@ -4,10 +4,11 @@
 
 - [[Agent Systems]]
 - [[Mathematics And Modeling]]
+- [[X Bookmark Intake]]
 
 ## Core Folders
 
-- `wiki/sources/`: source cards and provenance anchors.
+- `wiki/sources/`: provenance cards for raw info inputs.
 - `wiki/concepts/`: reusable concepts.
 - `wiki/methods/`: tools, playbooks, learning plans, and prompt templates.
 - `wiki/questions/`: open research questions.

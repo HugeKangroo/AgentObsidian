@@ -140,6 +140,22 @@ uv run --python 3.12 ks vault-status --project-root .
 
 ## Ingest Sources
 
+Local X bookmark capture CSV:
+
+```powershell
+uv run --python 3.12 ks vault-import-x-bookmarks --project-root . --bookmarks-csv ..\data\bookmarks-classified.csv --dry-run
+uv run --python 3.12 ks vault-import-x-bookmarks --project-root . --bookmarks-csv ..\data\bookmarks-classified.csv --limit 50
+```
+
+`vault-rebuild-samples` is only a regression fixture for representative rows.
+Use `vault-import-x-bookmarks` when importing local data material into the
+Obsidian vault. Existing source cards are skipped by default; use `--overwrite`
+only when intentionally rebuilding source cards from the CSV.
+
+Import writes raw evidence and source-card provenance views. The knowledge
+processing input is normalized info, so the next step is usually `info-prepare`
+rather than editing source cards by hand.
+
 Single webpage:
 
 ```powershell
@@ -216,6 +232,26 @@ Run the seed retrieval eval:
 ```powershell
 uv run --python 3.12 ks retrieval-eval --project-root . --eval-path evals\retrieval_examples.json --limit 5
 ```
+
+## Agent Info Processing Workflow
+
+Prepare an info-processing task bundle for Codex, Claude Code, or another local
+agent:
+
+```powershell
+uv run --python 3.12 ks info-prepare --project-root . --query "agent evaluation" --limit 5
+```
+
+The task bundle treats `info_units` as the input material. Source cards and raw
+manifests are evidence/provenance, not the target summary. The external agent
+should read the bundle, produce a schema-valid draft, and write it back through:
+
+```powershell
+uv run --python 3.12 ks info-apply --project-root . --draft-path path\to\draft.json
+```
+
+New pages are written as drafts. Updates to existing pages become reviewable
+proposals under `vault/proposals/`.
 
 ## Agent Synthesis Workflow
 

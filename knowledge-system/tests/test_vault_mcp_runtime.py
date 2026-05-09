@@ -222,6 +222,31 @@ def test_vault_cli_rebuild_compile_and_hybrid_search_without_kuzu(tmp_path: Path
     assert "candidates=" in cleanup_candidates.stdout
 
 
+def test_vault_cli_import_x_bookmarks_dry_run_counts_local_data(tmp_path: Path) -> None:
+    project_root = tmp_path / "knowledge-system"
+    bookmarks_csv = Path(__file__).parents[2] / "data" / "bookmarks-classified.csv"
+    runner = CliRunner()
+
+    result = runner.invoke(
+        app,
+        [
+            "vault-import-x-bookmarks",
+            "--project-root",
+            str(project_root),
+            "--bookmarks-csv",
+            str(bookmarks_csv),
+            "--limit",
+            "9",
+            "--dry-run",
+        ],
+    )
+
+    assert result.exit_code == 0
+    assert "sources=9" in result.stdout
+    assert "dry_run=True" in result.stdout
+    assert not (project_root / "vault").exists()
+
+
 def test_vault_mcp_tools_read_compiled_state_without_kuzu(tmp_path: Path) -> None:
     project_root = tmp_path / "knowledge-system"
     bookmarks_csv = Path(__file__).parents[2] / "data" / "bookmarks-classified.csv"
@@ -242,6 +267,9 @@ def test_vault_mcp_tools_read_compiled_state_without_kuzu(tmp_path: Path) -> Non
         assert "write_retrieval_trace" in tools
         assert "evaluate_retrieval" in tools
         assert "build_linked_evidence_queue" in tools
+        assert "import_x_bookmarks" in tools
+        assert "prepare_info_task" in tools
+        assert "apply_info_draft" in tools
         assert "capture_linked_evidence_item" in tools
         assert "get_linked_evidence_status" in tools
         assert "resolve_linked_evidence_reviews" in tools
@@ -266,6 +294,12 @@ def test_vault_mcp_tools_read_compiled_state_without_kuzu(tmp_path: Path) -> Non
         assert "retrieval-agent-evaluation.json" in trace["path"]
         linked_queue = await server._tool_manager.call_tool("build_linked_evidence_queue", {})
         assert linked_queue["item_count"] >= 1
+        imported = await server._tool_manager.call_tool(
+            "import_x_bookmarks",
+            {"bookmarks_csv": str(bookmarks_csv), "limit": 7, "dry_run": True},
+        )
+        assert imported["source_count"] == 7
+        assert imported["dry_run"] is True
         queue_payload = json.loads((project_root / "vault" / "generated" / "linked_evidence_queue.json").read_text(encoding="utf-8"))
         linked_item = next(item for item in queue_payload["items"] if item["kind"] == "external_link" and "langchain" in item["uri"])
         media_item = next(item for item in queue_payload["items"] if item["kind"] == "media_link")

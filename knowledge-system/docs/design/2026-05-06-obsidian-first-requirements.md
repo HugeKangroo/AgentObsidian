@@ -38,7 +38,7 @@ Root goal:
 ```text
 local sources and user interests
 -> evidence-preserving intake
--> raw capture and source normalization
+-> raw capture and info normalization
 -> agent-mediated understanding
 -> human-readable Obsidian wiki
 -> reviewable compounding updates
@@ -73,6 +73,7 @@ The product should be a local knowledge-compounding system, not:
 - Derived indexes may exist, but they must be rebuildable from canonical source files.
 - Raw source captures remain first-class evidence and must be preserved. Canonical wiki pages do not replace raw evidence.
 - The canonical state is the pair of immutable raw evidence plus maintained wiki pages, with schemas/logs/reviews making the relationship explicit.
+- The processing input is normalized info. Source cards are provenance/backlink surfaces, not the knowledge target that agents summarize.
 
 ### Kuzu
 
@@ -318,7 +319,7 @@ X bookmark target lifecycle:
 ```text
 bookmark row / URL
 -> raw capture under vault/raw/x-bookmarks/
--> normalized source card under vault/wiki/sources/
+-> normalized info unit with a source-card provenance view under vault/wiki/sources/
 -> proposed updates to concept/math/modeling/synthesis pages
 -> review blockers for missing URL/thread/media evidence
 -> cleanup candidate only after value is preserved
@@ -326,11 +327,11 @@ bookmark row / URL
 
 ### C7. Knowledge Compounding Workflow
 
-New knowledge should improve existing pages instead of creating endless source notes.
+New knowledge should improve existing pages instead of creating endless source notes. The direct processing object is the info unit; the source card exists to preserve evidence, links, and Obsidian graph traceability.
 
 Required:
 
-- Detect whether a source updates an existing concept, method, math topic, model, tool, or synthesis page.
+- Detect whether an info unit updates an existing concept, method, math topic, model, tool, or synthesis page.
 - Propose merges or updates with source evidence.
 - Create synthesis pages when multiple sources converge.
 - Strengthen bidirectional links and map-of-content placement whenever a page is created or rewritten.

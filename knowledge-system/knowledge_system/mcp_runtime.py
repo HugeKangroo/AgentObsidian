@@ -20,6 +20,7 @@ from .cleanup_readiness import emit_cleanup_candidates as emit_cleanup_candidate
 from .completion_audit import build_completion_audit as build_completion_audit_fn
 from .graph_index import compute_vault_graph, write_vault_graph
 from .health import build_health_report as build_health_report_fn
+from .info_processing import apply_info_distillation_draft_file, build_info_context_pack, write_info_task_bundle
 from .linked_evidence import build_linked_evidence_queue as build_linked_evidence_queue_fn
 from .linked_evidence import build_linked_evidence_status as build_linked_evidence_status_fn
 from .linked_evidence import capture_linked_evidence_item as capture_linked_evidence_item_fn
@@ -27,7 +28,7 @@ from .linked_evidence import record_linked_evidence_decision as record_linked_ev
 from .linked_evidence import resolve_linked_evidence_reviews as resolve_linked_evidence_reviews_fn
 from .markdown_io import write_markdown_text
 from .media_annotations import record_media_annotation as record_media_annotation_fn
-from .paths import VAULT_PATH_ENV, resolve_vault_path
+from .paths import VAULT_PATH_ENV, resolve_project_reference, resolve_vault_path
 from .proposals import (
     accept_proposal as accept_proposal_fn,
     create_page_update_proposal,
@@ -40,7 +41,7 @@ from .search_index import (
     write_retrieval_trace as write_retrieval_trace_fn,
 )
 from .vault_compile import compile_vault as compile_vault_fn
-from .vault_pipeline import vault_intake_media, vault_intake_pdf, vault_intake_repo, vault_intake_webpage
+from .vault_pipeline import import_x_bookmarks_to_vault, vault_intake_media, vault_intake_pdf, vault_intake_repo, vault_intake_webpage
 
 
 def create_mcp_server(project_root: Path, vault_path: Path | None = None) -> FastMCP:
@@ -126,6 +127,70 @@ def create_mcp_server(project_root: Path, vault_path: Path | None = None) -> Fas
             "success_count": result.success_count,
             "blocked_count": result.blocked_count,
             "path": str(result.path),
+        }
+
+    @mcp.tool()
+    def import_x_bookmarks(
+        bookmarks_csv: str = "../data/bookmarks-classified.csv",
+        limit: int | None = None,
+        offset: int = 0,
+        dry_run: bool = True,
+        overwrite: bool = False,
+    ) -> dict[str, Any]:
+        """Import local X bookmark capture rows into vault raw evidence and source cards."""
+        result = import_x_bookmarks_to_vault(
+            project_root=root,
+            bookmarks_csv=resolve_project_reference(root, bookmarks_csv),
+            limit=limit,
+            offset=offset,
+            dry_run=dry_run,
+            overwrite=overwrite,
+        )
+        return {
+            "source_count": result.source_count,
+            "skipped_existing_count": result.skipped_existing_count,
+            "dry_run": result.dry_run,
+            "path": str(result.report_path) if result.report_path else "",
+        }
+
+    @mcp.tool()
+    def prepare_info_task(
+        query: str = "",
+        info_ids: list[str] | None = None,
+        limit: int = 5,
+        target_page_id: str = "",
+        page_type: str = "synthesis",
+    ) -> dict[str, Any]:
+        """Prepare a Codex/Claude task bundle that processes normalized info units directly."""
+        context_pack = build_info_context_pack(
+            project_root=root,
+            query=query,
+            info_ids=info_ids or [],
+            limit=limit,
+            target_page_id=target_page_id,
+            page_type=page_type,
+        )
+        bundle = write_info_task_bundle(project_root=root, context_pack=context_pack)
+        return {
+            "run_id": bundle.run_id,
+            "info_unit_count": len(context_pack.info_units),
+            "context_path": str(bundle.context_path),
+            "task_path": str(bundle.task_path),
+        }
+
+    @mcp.tool()
+    def apply_info_draft(draft_path: str) -> dict[str, Any]:
+        """Apply an agent-generated info distillation draft as a vault page or reviewed proposal."""
+        result = apply_info_distillation_draft_file(project_root=root, draft_path=resolve_project_reference(root, draft_path))
+        return {
+            "page_id": result.page_id,
+            "action": result.action,
+            "status": result.status,
+            "review_count": result.review_count,
+            "path": str(result.vault_path),
+            "result_path": str(result.apply_result_path),
+            "proposal_id": result.proposal_id,
+            "target_page_id": result.target_page_id,
         }
 
     @mcp.tool()

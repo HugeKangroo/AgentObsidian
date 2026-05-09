@@ -52,11 +52,19 @@ class VaultStore:
         raw_text_path.write_text(source.raw_text or source.title, encoding="utf-8")
         manifest_path = raw_dir / "manifest.json"
         manifest = {
+            "info_id": source.id,
             "source_id": source.id,
             "source_type": source.source_type,
             "uri": source.uri,
             "title": source.title,
             "author": source.author,
+            "priority": source.priority,
+            "domain": source.domain,
+            "value_type": source.value_type,
+            "processor": source.processor,
+            "tags": source.tags,
+            "source_date": source.source_date,
+            "archived_path": source.archived_path,
             "external_links": source.external_links,
             "image_links": source.image_links,
             "raw_text_path": vault_reference(self.project_root, raw_text_path),
@@ -73,10 +81,21 @@ class VaultStore:
         shutil.copy2(raw_path, target)
         manifest_path = raw_dir / "manifest.json"
         manifest = {
+            "info_id": source.id,
             "source_id": source.id,
             "source_type": source.source_type,
             "uri": source.uri,
             "title": source.title,
+            "author": source.author,
+            "priority": source.priority,
+            "domain": source.domain,
+            "value_type": source.value_type,
+            "processor": source.processor,
+            "tags": source.tags,
+            "source_date": source.source_date,
+            "archived_path": source.archived_path,
+            "external_links": source.external_links,
+            "image_links": source.image_links,
             "raw_path": vault_reference(self.project_root, target),
             "captured_at": datetime.now(timezone.utc).isoformat(),
         }
