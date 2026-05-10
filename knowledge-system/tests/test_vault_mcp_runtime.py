@@ -272,6 +272,7 @@ def test_vault_mcp_tools_read_compiled_state_without_kuzu(tmp_path: Path) -> Non
         assert "apply_info_draft" in tools
         assert "capture_linked_evidence_item" in tools
         assert "get_linked_evidence_status" in tools
+        assert "record_linked_evidence_batch_decisions" in tools
         assert "resolve_linked_evidence_reviews" in tools
         assert "get_cleanup_readiness" in tools
         assert "emit_cleanup_candidates" in tools
@@ -359,6 +360,7 @@ def test_vault_mcp_tools_read_compiled_state_without_kuzu(tmp_path: Path) -> Non
         status = await server._tool_manager.call_tool("get_linked_evidence_status", {})
         assert status["captured_count"] >= 3
         assert status["decision_count"] >= 1
+        assert "needs_followup_count" in status
         readiness = await server._tool_manager.call_tool("get_cleanup_readiness", {})
         assert readiness["source_count"] >= 6
         assert readiness["blocked_count"] >= 1

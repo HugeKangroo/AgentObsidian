@@ -43,6 +43,7 @@ def test_codex_config_toml_matches_codex_mcp_shape(tmp_path: Path) -> None:
     assert "capture_linked_evidence_item" in server["enabled_tools"]
     assert "get_linked_evidence_status" in server["enabled_tools"]
     assert "record_linked_evidence_decision" in server["enabled_tools"]
+    assert "record_linked_evidence_batch_decisions" in server["enabled_tools"]
     assert "resolve_linked_evidence_reviews" in server["enabled_tools"]
     assert "record_media_annotation" in server["enabled_tools"]
     assert "get_cleanup_readiness" in server["enabled_tools"]
@@ -70,6 +71,7 @@ def test_codex_read_only_config_limits_enabled_tools(tmp_path: Path) -> None:
     assert "capture_linked_evidence_item" not in enabled_tools
     assert "get_linked_evidence_status" in enabled_tools
     assert "record_linked_evidence_decision" not in enabled_tools
+    assert "record_linked_evidence_batch_decisions" not in enabled_tools
     assert "resolve_linked_evidence_reviews" not in enabled_tools
     assert "record_media_annotation" not in enabled_tools
     assert "get_cleanup_readiness" in enabled_tools

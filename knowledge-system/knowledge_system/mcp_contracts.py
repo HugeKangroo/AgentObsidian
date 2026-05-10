@@ -20,6 +20,7 @@ def mcp_tool_names() -> list[str]:
         "capture_linked_evidence_item",
         "get_linked_evidence_status",
         "record_linked_evidence_decision",
+        "record_linked_evidence_batch_decisions",
         "resolve_linked_evidence_reviews",
         "record_media_annotation",
         "get_cleanup_readiness",

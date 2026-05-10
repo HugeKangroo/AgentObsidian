@@ -122,7 +122,7 @@ def vault_hybrid_search(
         graph_score = graph_scores.get(page_id, 0.0)
         source_priority_score = 0.7 if page.sources else 0.35
         page_type_score = _page_type_score(page.type)
-        review_penalty = min(0.6, review_counts[page_id] * 0.12)
+        review_penalty = _review_penalty(page.type, review_counts[page_id])
         final_score = (
             text_score * 0.42
             + vector_score * 0.16
@@ -321,6 +321,13 @@ def _page_type_score(page_type: str) -> float:
     if page_type == "map":
         return -0.22
     return 0.0
+
+
+def _review_penalty(page_type: str, pending_review_count: int) -> float:
+    penalty = min(0.6, pending_review_count * 0.12)
+    if page_type == "synthesis" and pending_review_count:
+        penalty = min(1.0, penalty + pending_review_count * 0.18)
+    return penalty
 
 
 def _tag_penalty(tags: list[str]) -> float:

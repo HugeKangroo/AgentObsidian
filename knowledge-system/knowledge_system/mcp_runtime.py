@@ -24,6 +24,7 @@ from .info_processing import apply_info_distillation_draft_file, build_info_cont
 from .linked_evidence import build_linked_evidence_queue as build_linked_evidence_queue_fn
 from .linked_evidence import build_linked_evidence_status as build_linked_evidence_status_fn
 from .linked_evidence import capture_linked_evidence_item as capture_linked_evidence_item_fn
+from .linked_evidence import record_linked_evidence_batch_decisions as record_linked_evidence_batch_decisions_fn
 from .linked_evidence import record_linked_evidence_decision as record_linked_evidence_decision_fn
 from .linked_evidence import resolve_linked_evidence_reviews as resolve_linked_evidence_reviews_fn
 from .markdown_io import write_markdown_text
@@ -238,6 +239,8 @@ def create_mcp_server(project_root: Path, vault_path: Path | None = None) -> Fas
             "pending_count": result.pending_count,
             "captured_count": result.captured_count,
             "unsupported_count": result.unsupported_count,
+            "decided_count": result.decided_count,
+            "needs_followup_count": result.needs_followup_count,
             "decision_count": result.decision_count,
             "path": str(result.path),
         }
@@ -255,6 +258,31 @@ def create_mcp_server(project_root: Path, vault_path: Path | None = None) -> Fas
         return {
             "queue_item_id": result.queue_item_id,
             "decision": result.decision,
+            "path": str(result.path),
+        }
+
+    @mcp.tool()
+    def record_linked_evidence_batch_decisions(
+        decision: str,
+        rationale: str,
+        reviewer: str = "",
+        kinds: list[str] | None = None,
+        source_ids: list[str] | None = None,
+        limit: int | None = None,
+    ) -> dict[str, Any]:
+        """Record one compact auditable decision for many undecided linked evidence items."""
+        result = record_linked_evidence_batch_decisions_fn(
+            project_root=root,
+            decision=decision,
+            rationale=rationale,
+            reviewer=reviewer,
+            kinds=kinds or [],
+            source_ids=source_ids or [],
+            limit=limit,
+        )
+        return {
+            "decision": result.decision,
+            "item_count": result.item_count,
             "path": str(result.path),
         }
 

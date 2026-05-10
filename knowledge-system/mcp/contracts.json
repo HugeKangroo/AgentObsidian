@@ -69,6 +69,11 @@
     "safety": "narrow_write",
     "returns_run_id": true
   },
+  "record_linked_evidence_batch_decisions": {
+    "name": "record_linked_evidence_batch_decisions",
+    "safety": "narrow_write",
+    "returns_run_id": true
+  },
   "resolve_linked_evidence_reviews": {
     "name": "resolve_linked_evidence_reviews",
     "safety": "narrow_write",

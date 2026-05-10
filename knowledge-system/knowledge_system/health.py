@@ -58,6 +58,8 @@ def build_health_report(project_root: Path) -> HealthReportResult:
                     "pending_count": linked_payload["pending_count"],
                     "captured_count": linked_payload["captured_count"],
                     "unsupported_count": linked_payload["unsupported_count"],
+                    "decided_count": linked_payload.get("decided_count", 0),
+                    "needs_followup_count": linked_payload.get("needs_followup_count", 0),
                     "decision_count": linked_payload["decision_count"],
                 },
                 "cleanup_readiness": {

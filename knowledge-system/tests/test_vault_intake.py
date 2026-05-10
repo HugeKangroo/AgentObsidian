@@ -10,6 +10,7 @@ from knowledge_system.cleanup_readiness import build_cleanup_readiness, emit_cle
 from knowledge_system.linked_evidence import (
     build_linked_evidence_status,
     capture_linked_evidence_item,
+    record_linked_evidence_batch_decisions,
     record_linked_evidence_decision,
     resolve_linked_evidence_reviews,
 )
@@ -368,6 +369,32 @@ def test_linked_evidence_decision_records_auditable_status(tmp_path: Path) -> No
     assert status_item["decision_reviewer"] == "codex"
     assert status_item["decision_path"].endswith(".md")
     assert any(review.type == "linked_evidence_decision" for review in compiled.reviews)
+
+
+def test_linked_evidence_batch_decision_compacts_pending_followup_status(tmp_path: Path) -> None:
+    project_root = tmp_path / "knowledge-system"
+    bookmarks_csv = Path(__file__).parents[2] / "data" / "bookmarks-classified.csv"
+    rebuild_sample_vault(project_root=project_root, bookmarks_csv=bookmarks_csv)
+
+    batch = record_linked_evidence_batch_decisions(
+        project_root=project_root,
+        decision="needs_followup",
+        rationale="Seed import backlog should remain visible for a targeted capture agent before cleanup.",
+        reviewer="codex",
+    )
+    status = build_linked_evidence_status(project_root=project_root)
+    status_payload = json.loads(status.path.read_text(encoding="utf-8"))
+    compiled = compile_vault(project_root)
+
+    assert batch.item_count == 7
+    assert batch.path.exists()
+    assert batch.path.read_text(encoding="utf-8").count("| `linked-evidence-") == 7
+    assert status.pending_count == 0
+    assert status.decision_count == 7
+    assert status.needs_followup_count == 7
+    assert {item["status"] for item in status_payload["items"]} == {"needs_followup"}
+    assert all(item["decision_path"].endswith(".md") for item in status_payload["items"])
+    assert any(review.type == "linked_evidence_batch_decision" for review in compiled.reviews)
 
 
 def test_resolve_linked_evidence_reviews_closes_parent_blockers_after_decisions(tmp_path: Path) -> None:

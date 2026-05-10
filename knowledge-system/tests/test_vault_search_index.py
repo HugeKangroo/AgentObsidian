@@ -99,6 +99,55 @@ def test_vault_hybrid_search_penalizes_pending_reviews(tmp_path: Path) -> None:
     assert "unresolved_review" in hits[0].reasons
 
 
+def test_vault_hybrid_search_prefers_clean_page_over_blocked_synthesis(tmp_path: Path) -> None:
+    project_root = tmp_path / "knowledge-system"
+    vault = project_root / "vault"
+    _write_page(
+        vault / "wiki" / "learning" / "agent-evaluation-readiness.md",
+        "id: learning-plan-agent-evaluation-readiness\n"
+        "title: Agent Evaluation Readiness\n"
+        "type: learning_plan\n"
+        "tags: [agent, evaluation]\n"
+        "sources: [x-agent]\n",
+        "# Agent Evaluation Readiness\n\n"
+        "Agent evaluation readiness uses regression evals, traces, and review loops.\n",
+    )
+    _write_page(
+        vault / "wiki" / "synthesis" / "agent-evaluation-readiness-feedback-loop.md",
+        "id: synthesis-agent-evaluation-readiness-feedback-loop\n"
+        "title: Agent Evaluation Readiness Feedback Loop\n"
+        "type: synthesis\n"
+        "tags: [agent, evaluation]\n"
+        "sources: [x-agent]\n",
+        "# Agent Evaluation Readiness Feedback Loop\n\n"
+        "Agent evaluation readiness regression evals traces feedback loop. "
+        "Agent evaluation readiness regression evals traces feedback loop.\n",
+    )
+    for index in range(1, 4):
+        _write_page(
+            vault / "reviews" / f"review-agent-evaluation-{index}.md",
+            f"id: review-agent-evaluation-{index}\n"
+            f"type: missing_evidence\n"
+            f"status: pending\n"
+            f"blocking: true\n"
+            f"page_id: synthesis-agent-evaluation-readiness-feedback-loop\n"
+            f"source_id: x-agent\n",
+            "# Review\n\nNeed unresolved linked evidence.\n",
+        )
+    compiled = compile_vault(project_root)
+    build_search_index(project_root, compiled)
+
+    hits = vault_hybrid_search(
+        project_root,
+        "agent evaluation readiness regression evals traces",
+        limit=2,
+        compiled=compiled,
+    )
+
+    assert hits[0].page_id == "learning-plan-agent-evaluation-readiness"
+    assert hits[1].page_id == "synthesis-agent-evaluation-readiness-feedback-loop"
+
+
 def test_retrieval_trace_and_eval_are_written_as_generated_artifacts(tmp_path: Path) -> None:
     project_root = tmp_path / "knowledge-system"
     vault = project_root / "vault"

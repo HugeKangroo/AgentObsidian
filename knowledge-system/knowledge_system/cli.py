@@ -28,6 +28,7 @@ from .linked_evidence import (
     build_linked_evidence_queue,
     build_linked_evidence_status,
     capture_linked_evidence_item,
+    record_linked_evidence_batch_decisions,
     record_linked_evidence_decision,
     resolve_linked_evidence_reviews,
 )
@@ -367,7 +368,7 @@ def linked_evidence_status_command(
 ) -> None:
     result = build_linked_evidence_status(project_root=project_root)
     typer.echo(
-        f"total={result.total_count} pending={result.pending_count} captured={result.captured_count} unsupported={result.unsupported_count} decisions={result.decision_count} status={result.path}"
+        f"total={result.total_count} pending={result.pending_count} captured={result.captured_count} unsupported={result.unsupported_count} decided={result.decided_count} needs_followup={result.needs_followup_count} decisions={result.decision_count} status={result.path}"
     )
 
 
@@ -388,6 +389,29 @@ def linked_evidence_decision_command(
         reviewer=reviewer,
     )
     typer.echo(f"item_id={result.queue_item_id} decision={result.decision} path={result.path}")
+
+
+@app.command("linked-evidence-batch-decision")
+def linked_evidence_batch_decision_command(
+    project_root: Path = typer.Option(Path("knowledge-system")),
+    decision: str = typer.Option(...),
+    rationale: str = typer.Option(""),
+    rationale_path: Path | None = typer.Option(None),
+    reviewer: str = typer.Option(""),
+    kind: list[str] | None = typer.Option(None, "--kind"),
+    source_id: list[str] | None = typer.Option(None, "--source-id"),
+    limit: int | None = typer.Option(None),
+) -> None:
+    result = record_linked_evidence_batch_decisions(
+        project_root=project_root,
+        decision=decision,
+        rationale=_text_or_file(rationale, rationale_path),
+        reviewer=reviewer,
+        kinds=kind or [],
+        source_ids=source_id or [],
+        limit=limit,
+    )
+    typer.echo(f"decision={result.decision} items={result.item_count} path={result.path}")
 
 
 @app.command("linked-evidence-resolve-reviews")

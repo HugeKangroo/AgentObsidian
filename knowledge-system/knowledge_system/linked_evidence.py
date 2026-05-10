@@ -55,6 +55,8 @@ class LinkedEvidenceStatusResult:
     captured_count: int
     unsupported_count: int
     decision_count: int = 0
+    decided_count: int = 0
+    needs_followup_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -62,6 +64,13 @@ class LinkedEvidenceDecisionResult:
     path: Path
     queue_item_id: str
     decision: str
+
+
+@dataclass(frozen=True)
+class LinkedEvidenceBatchDecisionResult:
+    path: Path
+    decision: str
+    item_count: int
 
 
 @dataclass(frozen=True)
@@ -96,12 +105,12 @@ def build_linked_evidence_status(project_root: Path) -> LinkedEvidenceStatusResu
     captures = _capture_results(project_root)
     decisions = _decision_results(project_root)
     items = []
-    counts = {"pending": 0, "captured": 0, "unsupported": 0}
+    counts = {"pending": 0, "captured": 0, "unsupported": 0, "decided": 0, "needs_followup": 0}
     for queue_item in queue_payload.get("items", []):
         item_id = str(queue_item.get("id") or "")
         capture = captures.get(item_id, {})
         decision = decisions.get(item_id, {})
-        status = str(capture.get("status") or "pending")
+        status = _merged_status(capture, decision)
         if status not in counts:
             status = "pending"
         counts[status] += 1
@@ -132,6 +141,8 @@ def build_linked_evidence_status(project_root: Path) -> LinkedEvidenceStatusResu
         "pending_count": counts["pending"],
         "captured_count": counts["captured"],
         "unsupported_count": counts["unsupported"],
+        "decided_count": counts["decided"],
+        "needs_followup_count": counts["needs_followup"],
         "decision_count": len(decisions),
         "items": items,
     }
@@ -143,6 +154,8 @@ def build_linked_evidence_status(project_root: Path) -> LinkedEvidenceStatusResu
         captured_count=counts["captured"],
         unsupported_count=counts["unsupported"],
         decision_count=len(decisions),
+        decided_count=counts["decided"],
+        needs_followup_count=counts["needs_followup"],
     )
 
 
@@ -153,10 +166,7 @@ def record_linked_evidence_decision(
     rationale: str,
     reviewer: str = "",
 ) -> LinkedEvidenceDecisionResult:
-    normalized_decision = decision.strip().lower()
-    allowed = {"reviewed", "nonessential", "needs_followup"}
-    if normalized_decision not in allowed:
-        raise ValueError(f"decision must be one of: {', '.join(sorted(allowed))}")
+    normalized_decision = _normalize_decision(decision)
     if not rationale.strip():
         raise ValueError("Linked evidence decision rationale cannot be empty.")
     item = _queue_item(project_root, item_id)
@@ -183,6 +193,53 @@ def record_linked_evidence_decision(
     )
     build_linked_evidence_status(project_root)
     return LinkedEvidenceDecisionResult(path=path, queue_item_id=item.id, decision=normalized_decision)
+
+
+def record_linked_evidence_batch_decisions(
+    project_root: Path,
+    decision: str,
+    rationale: str,
+    reviewer: str = "",
+    kinds: list[str] | None = None,
+    source_ids: list[str] | None = None,
+    limit: int | None = None,
+) -> LinkedEvidenceBatchDecisionResult:
+    normalized_decision = _normalize_decision(decision)
+    if not rationale.strip():
+        raise ValueError("Linked evidence batch decision rationale cannot be empty.")
+    status = build_linked_evidence_status(project_root)
+    payload = json.loads(status.path.read_text(encoding="utf-8"))
+    selected = _select_batch_decision_items(
+        payload.get("items", []),
+        kinds=set(kinds or []),
+        source_ids=set(source_ids or []),
+        limit=limit,
+    )
+    if not selected:
+        raise ValueError("No undecided linked evidence items matched the batch decision filters.")
+    decided_at = datetime.now(timezone.utc).isoformat()
+    decision_id = f"linked-evidence-batch-decision-{decided_at.replace(':', '').replace('.', '')}-{normalized_decision}"
+    path = resolve_vault_path(project_root) / "reviews" / f"{slugify(decision_id)}.md"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        write_markdown_text(
+            {
+                "id": slugify(decision_id),
+                "type": "linked_evidence_batch_decision",
+                "status": "decided",
+                "blocking": normalized_decision == "needs_followup",
+                "decision": normalized_decision,
+                "reviewer": reviewer,
+                "decided_at": decided_at,
+                "updated": decided_at[:10],
+                "item_count": len(selected),
+            },
+            _batch_decision_body(selected, normalized_decision, rationale, reviewer),
+        ),
+        encoding="utf-8",
+    )
+    build_linked_evidence_status(project_root)
+    return LinkedEvidenceBatchDecisionResult(path=path, decision=normalized_decision, item_count=len(selected))
 
 
 def resolve_linked_evidence_reviews(project_root: Path, reviewer: str = "") -> LinkedEvidenceReviewResolutionResult:
@@ -523,6 +580,45 @@ def _decision_body(item: LinkedEvidenceItem, decision: str, rationale: str, revi
 """
 
 
+def _batch_decision_body(items: list[dict[str, Any]], decision: str, rationale: str, reviewer: str) -> str:
+    rows = [
+        "| Queue item | Source | Kind | URI |",
+        "|---|---|---|---|",
+    ]
+    for item in items:
+        rows.append(
+            "| "
+            + f"`{item.get('id') or ''}` | "
+            + f"`{item.get('source_id') or ''}` | "
+            + f"`{item.get('kind') or ''}` | "
+            + f"{item.get('uri') or ''} |"
+        )
+    table = "\n".join(rows)
+    return f"""# Linked Evidence Batch Decision
+
+## Decision
+
+| Field | Value |
+|---|---|
+| Decision | `{decision}` |
+| Item count | `{len(items)}` |
+| Reviewer | {reviewer or "Unspecified"} |
+
+## Rationale
+
+{rationale.strip()}
+
+## Items
+
+{table}
+
+## Boundary
+
+> [!warning] Cleanup Boundary
+> This batch decision is an input to source cleanup readiness. It does not delete bookmarks, raw evidence, or external content by itself.
+"""
+
+
 def _clone_repo_to_runs(project_root: Path, item: LinkedEvidenceItem) -> Path:
     target_root = project_root / "runs" / "linked-repo-clones"
     target_root.mkdir(parents=True, exist_ok=True)
@@ -584,6 +680,48 @@ def _write_capture_result(
     )
 
 
+def _normalize_decision(decision: str) -> str:
+    normalized = decision.strip().lower()
+    allowed = {"reviewed", "nonessential", "needs_followup"}
+    if normalized not in allowed:
+        raise ValueError(f"decision must be one of: {', '.join(sorted(allowed))}")
+    return normalized
+
+
+def _merged_status(capture: dict[str, Any], decision: dict[str, Any]) -> str:
+    capture_status = str(capture.get("status") or "")
+    if capture_status in {"captured", "unsupported"}:
+        return capture_status
+    decision_value = str(decision.get("decision") or "")
+    if decision_value == "needs_followup":
+        return "needs_followup"
+    if decision_value in {"reviewed", "nonessential"}:
+        return "decided"
+    return "pending"
+
+
+def _select_batch_decision_items(
+    items: list[Any],
+    kinds: set[str],
+    source_ids: set[str],
+    limit: int | None,
+) -> list[dict[str, Any]]:
+    selected: list[dict[str, Any]] = []
+    for item in items:
+        if not isinstance(item, dict):
+            continue
+        if str(item.get("decision") or ""):
+            continue
+        if kinds and str(item.get("kind") or "") not in kinds:
+            continue
+        if source_ids and str(item.get("source_id") or "") not in source_ids:
+            continue
+        selected.append(item)
+        if limit is not None and len(selected) >= limit:
+            break
+    return selected
+
+
 def _capture_results(project_root: Path) -> dict[str, dict[str, Any]]:
     captures_root = resolve_vault_path(project_root) / "generated" / "linked_evidence_captures"
     captures: dict[str, dict[str, Any]] = {}
@@ -618,6 +756,26 @@ def _decision_results(project_root: Path) -> dict[str, dict[str, Any]]:
             "rationale": _rationale_from_decision_body(parsed.body),
             "decision_path": vault_reference(project_root, path),
         }
+    for path in sorted(reviews_root.glob("linked-evidence-batch-decision-*.md")):
+        parsed = parse_markdown_file(path)
+        if parsed.frontmatter.get("type") != "linked_evidence_batch_decision":
+            continue
+        decision = str(parsed.frontmatter.get("decision") or "")
+        reviewer = str(parsed.frontmatter.get("reviewer") or "")
+        decided_at = str(parsed.frontmatter.get("decided_at") or "")
+        rationale = _rationale_from_decision_body(parsed.body)
+        decision_path = vault_reference(project_root, path)
+        for item_id in _batch_decision_item_ids(parsed.body):
+            decisions.setdefault(
+                item_id,
+                {
+                    "decision": decision,
+                    "reviewer": reviewer,
+                    "decided_at": decided_at,
+                    "rationale": rationale,
+                    "decision_path": decision_path,
+                },
+            )
     return decisions
 
 
@@ -629,6 +787,19 @@ def _rationale_from_decision_body(body: str) -> str:
     if "## " in tail:
         tail = tail.split("## ", 1)[0]
     return tail.strip()
+
+
+def _batch_decision_item_ids(body: str) -> list[str]:
+    item_ids = []
+    for line in body.splitlines():
+        stripped = line.strip()
+        if not stripped.startswith("| `linked-evidence-"):
+            continue
+        parts = [part.strip() for part in stripped.strip("|").split("|")]
+        if not parts:
+            continue
+        item_ids.append(parts[0].strip("`"))
+    return item_ids
 
 
 def _required_linked_kind(body: str) -> str:
